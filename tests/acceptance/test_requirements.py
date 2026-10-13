@@ -43,13 +43,14 @@ def test_behavior(value):
     assert value > 0
 """,
     )
-    assert project.runpytest_subprocess("--req-json=report.json").ret == pytest.ExitCode.OK
+    result = project.runpytest_subprocess("--req-json=report.json")
+    assert result.ret == pytest.ExitCode.OK
+    result.assert_outcomes(passed=2)
     tests = read_report(project)["requirements"]["REQ-001"]["tests"]
-    assert {test["nodeid"] for test in tests} == {
-        "test_behavior.py::test_behavior[first]",
-        "test_behavior.py::test_behavior[second]",
-    }
-    assert all(test["outcome"] == "PASSED" for test in tests)
+    assert tests == [
+        {"nodeid": "test_behavior.py::test_behavior[first]", "outcome": "PASSED"},
+        {"nodeid": "test_behavior.py::test_behavior[second]", "outcome": "PASSED"},
+    ]
 
 
 def test_requirement_markers_can_be_inherited_from_a_test_class(user_project, read_report):
@@ -65,10 +66,17 @@ class TestBehavior:
         pass
 """,
     )
-    assert project.runpytest_subprocess("--req-json=report.json").ret == pytest.ExitCode.OK
+    result = project.runpytest_subprocess("--req-json=report.json")
+    assert result.ret == pytest.ExitCode.OK
+    result.assert_outcomes(passed=2)
     requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "PASSED"
-    assert len(requirement["tests"]) == 2
+    assert requirement == {
+        "status": "PASSED",
+        "tests": [
+            {"nodeid": "test_behavior.py::TestBehavior::test_first", "outcome": "PASSED"},
+            {"nodeid": "test_behavior.py::TestBehavior::test_second", "outcome": "PASSED"},
+        ],
+    }
 
 
 def test_repeating_a_marker_does_not_count_the_same_test_twice(user_project, read_report):
@@ -81,8 +89,13 @@ def test_behavior():
     pass
 """,
     )
-    project.runpytest_subprocess("--req-json=report.json")
-    assert len(read_report(project)["requirements"]["REQ-001"]["tests"]) == 1
+    result = project.runpytest_subprocess("--req-json=report.json")
+    assert result.ret == pytest.ExitCode.OK
+    result.assert_outcomes(passed=1)
+    assert read_report(project)["requirements"]["REQ-001"] == {
+        "status": "PASSED",
+        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": "PASSED"}],
+    }
 
 
 @pytest.mark.parametrize(

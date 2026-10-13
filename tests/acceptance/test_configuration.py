@@ -2,14 +2,20 @@
 
 import pytest
 
-MARKED_TEST = '@pytest.mark.req("REQ-001")\ndef test_behavior():\n    pass\n'
-
 
 def test_requirements_can_be_declared_in_pytest_ini(user_project, read_report):
-    project = user_project(["REQ-001"], MARKED_TEST)
+    project = user_project(
+        ["REQ-001"],
+        """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    pass
+""",
+    )
     (project.path / "pyproject.toml").unlink()
     project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n    REQ-001\n    REQ-002\n")
-    project.runpytest_subprocess("--req-json=report.json")
+    result = project.runpytest_subprocess("--req-json=report.json")
+    assert result.ret == pytest.ExitCode.OK
     requirements = read_report(project)["requirements"]
     assert requirements["REQ-001"]["status"] == "PASSED"
     assert requirements["REQ-002"] == {"status": "MISSING", "tests": []}
@@ -18,14 +24,28 @@ def test_requirements_can_be_declared_in_pytest_ini(user_project, read_report):
 def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
     user_project, read_report
 ):
-    project = user_project(["REQ-001"], MARKED_TEST)
+    project = user_project(
+        ["REQ-001"],
+        """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    pass
+""",
+    )
     project.makefile(".ini", pytest="[pytest]\naddopts = -q\n")
     assert project.runpytest_subprocess("--req-strict", "--req-json=report.json").ret == 0
     assert read_report(project)["requirements"]["REQ-001"]["status"] == "PASSED"
 
 
 def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project):
-    project = user_project(["REQ-001"], MARKED_TEST)
+    project = user_project(
+        ["REQ-001"],
+        """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    pass
+""",
+    )
     project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n    REQ-002\n")
     result = project.runpytest_subprocess("--req-report")
     assert result.ret != pytest.ExitCode.OK
@@ -46,7 +66,14 @@ def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project
 def test_other_configuration_files_do_not_supply_a_requirement_inventory(
     user_project, filename, content
 ):
-    project = user_project(["REQ-001"], MARKED_TEST)
+    project = user_project(
+        ["REQ-001"],
+        """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    pass
+""",
+    )
     (project.path / "pyproject.toml").unlink()
     (project.path / filename).write_text(content, encoding="utf-8")
     result = project.runpytest_subprocess("--req-strict")
@@ -83,7 +110,14 @@ def test_no_requirement_configuration_means_success_with_zero_requirements(
 
 
 def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(user_project):
-    project = user_project(["REQ-001"], MARKED_TEST)
+    project = user_project(
+        ["REQ-001"],
+        """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    pass
+""",
+    )
     (project.path / "pyproject.toml").unlink()
     project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n    REQ-001\n    REQ-001\n")
     result = project.runpytest_subprocess()
@@ -91,3 +125,67 @@ def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(user_project):
     message = result.stdout.str() + result.stderr.str()
     assert "requirements" in message.lower()
     assert "REQ-001" in message
+
+
+@pytest.mark.parametrize("config_file", ["pyproject.toml", "pytest.ini", None])
+def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
+    user_project, config_file
+):
+    project = user_project(
+        [],
+        """
+@pytest.mark.req("UNKNOWN")
+def test_behavior():
+    pass
+""",
+    )
+    if config_file != "pyproject.toml":
+        (project.path / "pyproject.toml").unlink()
+    if config_file == "pytest.ini":
+        project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n")
+
+    result = project.runpytest_subprocess()
+
+    assert result.ret != pytest.ExitCode.OK
+    message = result.stdout.str() + result.stderr.str()
+    assert "UNKNOWN" in message
+    assert "test_behavior.py::test_behavior" in message
+
+
+@pytest.mark.parametrize(
+    ("filename", "content"),
+    [
+        ("setup.cfg", "[tool:pytest]\nreq_requirements = REQ-001\n"),
+        ("tox.ini", "[pytest]\nreq_requirements = REQ-001\n"),
+        ("requirements.json", '{"requirements": ["REQ-001"]}'),
+        ("requirements.yaml", "requirements:\n  - REQ-001\n"),
+    ],
+)
+def test_unsupported_inventory_files_are_ignored_when_tests_are_unmarked(
+    user_project, read_report, filename, content
+):
+    project = user_project(
+        [],
+        """
+def test_unmarked():
+    pass
+""",
+    )
+    (project.path / "pyproject.toml").unlink()
+    (project.path / filename).write_text(content, encoding="utf-8")
+
+    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+
+    assert result.ret == pytest.ExitCode.OK
+    result.assert_outcomes(passed=1)
+    assert read_report(project) == {
+        "requirements": {},
+        "summary": {
+            "requirements": 0,
+            "passed": 0,
+            "unverified": 0,
+            "coverage": 0.0,
+            "verified": True,
+            "collection_errors": 0,
+        },
+    }
