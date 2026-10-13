@@ -225,6 +225,7 @@ When the user corrects your approach, append a one-line rule here before ending 
 - Check aggregation in both test collection orders to catch first-result shortcuts.
 - Keep the product name `pytest-reqmark` consistent across packaging, configuration,
   reports and documentation; use `pytest_reqmark` for Python imports.
+- Trigger CI on pull requests and pushes to `master`; avoid duplicate feature-branch push runs.
 
 ---
 
