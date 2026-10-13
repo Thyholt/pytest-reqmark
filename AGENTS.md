@@ -202,6 +202,8 @@ are expected to fail until implementation. Never hide this with skips or xfails.
 - Acceptance verification ignores unmarked test outcomes; ordinary pytest exit behavior remains.
 - Python style follows ruff: Python 3.10 target, 100-character lines and sorted imports.
 - Runtime dependencies must remain limited to pytest for v0.1.
+- Keep `__init__.py` files completely empty: no docstrings, comments or code.
+  The package-root `__init__.py` may only export public user-facing functions.
 - Do not merge, release or deploy as a side effect of preparing a reviewable change.
 
 ### Session skills
