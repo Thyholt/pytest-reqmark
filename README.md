@@ -1,7 +1,6 @@
 # pytest-reqmark
 
-Executable acceptance criteria for pytest, implementing the
-`pytest-reqmark` v0.1 specification.
+Stupid-simple requirement marking and tracking for pytest.
 
 ## Current phase
 
