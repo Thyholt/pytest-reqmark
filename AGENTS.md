@@ -225,6 +225,10 @@ When the user corrects your approach, append a one-line rule here before ending 
 - A rejected acceptance input must produce a domain diagnostic; an unrecognized
   CLI option is not evidence that marker or inventory validation works.
 - Check aggregation in both test collection orders to catch first-result shortcuts.
+- Keep acceptance behavior visible in each test; do not import scenarios from
+  other test modules or generate test bodies through substitutions and fallbacks.
+- Assert complete test identities and outcomes, not only counts or sets that
+  can hide duplicated, omitted or unrelated report records.
 - Keep the product name `pytest-reqmark` consistent across packaging, configuration,
   reports and documentation; use `pytest_reqmark` for Python imports.
 - Trigger CI on pull requests and pushes to `master`; avoid duplicate feature-branch push runs.

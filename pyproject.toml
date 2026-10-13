@@ -33,8 +33,5 @@ extend-exclude = ["docs/specification-v0.1.md"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
-[tool.ruff.lint.isort]
-known-first-party = ["test_statuses"]
-
 [tool.ty.environment]
 python-version = "3.10"

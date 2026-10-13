@@ -110,7 +110,8 @@ Unknown marked IDs are rejected even for empty inventories in either supported
 format and when configuration is absent. Unsupported inventory files are ignored
 for unmarked projects, yielding successful zero-requirement verification.
 Association tests assert complete node-ID/outcome records, including ordering
-and duplicate detection. 
+and duplicate detection. Each outcome and precedence scenario keeps its source
+visible locally, with no imports from other test modules or source substitutions.
 
 ## Review and next step
 

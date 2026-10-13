@@ -2,8 +2,6 @@
 
 import pytest
 
-from test_statuses import SCENARIOS
-
 
 def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
     project = user_project(["REQ-001"], "def test_unmarked():\n    pass\n")
@@ -13,10 +11,71 @@ def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
     assert "pytest-reqmark" not in result.stdout.str()
 
 
-@pytest.mark.parametrize("status", ["SKIPPED", "XFAILED", "XPASSED", "FAILED", "ERROR"])
-def test_strict_mode_rejects_every_executed_unverified_outcome(user_project, status):
-    tests, fixtures = SCENARIOS[status]
-    project = user_project(["REQ-001"], '@pytest.mark.req("REQ-001")\n' + tests, fixtures=fixtures)
+@pytest.mark.parametrize(
+    ("tests", "fixtures", "status"),
+    [
+        pytest.param(
+            """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    pytest.skip("not available")
+""",
+            "",
+            "SKIPPED",
+            id="skipped-test",
+        ),
+        pytest.param(
+            """
+@pytest.mark.req("REQ-001")
+@pytest.mark.xfail(reason="known issue")
+def test_behavior():
+    assert False
+""",
+            "",
+            "XFAILED",
+            id="expected-failure",
+        ),
+        pytest.param(
+            """
+@pytest.mark.req("REQ-001")
+@pytest.mark.xfail(reason="known issue")
+def test_behavior():
+    pass
+""",
+            "",
+            "XPASSED",
+            id="unexpected-pass",
+        ),
+        pytest.param(
+            """
+@pytest.mark.req("REQ-001")
+def test_behavior():
+    assert False
+""",
+            "",
+            "FAILED",
+            id="failed-test",
+        ),
+        pytest.param(
+            """
+@pytest.mark.req("REQ-001")
+def test_behavior(broken):
+    pass
+""",
+            """
+@pytest.fixture
+def broken():
+    raise RuntimeError("setup failed")
+""",
+            "ERROR",
+            id="setup-error",
+        ),
+    ],
+)
+def test_strict_mode_rejects_every_executed_unverified_outcome(
+    user_project, tests, fixtures, status
+):
+    project = user_project(["REQ-001"], tests, fixtures=fixtures)
     result = project.runpytest_subprocess("--req-strict")
     assert result.ret != pytest.ExitCode.OK
     assert "pytest-reqmark" in result.stdout.str()
