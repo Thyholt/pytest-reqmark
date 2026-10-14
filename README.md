@@ -1,4 +1,4 @@
-# tracereq
+# pytest-tracereq
 
 Stupid simple requirement marking and tracking for pytest.
 
@@ -10,21 +10,6 @@ automatically. Python 3.10+ and pytest 8+ are supported.
 ```sh
 pip install pytest-tracereq
 ```
-
-### Migrating from pytest-reqmark
-
-Uninstall `pytest-reqmark` before installing `pytest-tracereq`; both plugins must
-not be installed together. Replace Python imports of `pytest_reqmark` with `tracereq`.
-Update existing projects as follows; the old names are no longer supported.
-
-| Previous name | New name |
-| --- | --- |
-| `pytest.mark.req(...)` | `pytest.mark.tracereq(...)` |
-| `pytest -m req` | `pytest -m tracereq` |
-| `--req-report`, `--req-strict`, `--req-json` | `--tracereq-report`, `--tracereq-strict`, `--tracereq-json` |
-| `[tool.pytest-reqmark]` | `[tool.tracereq]` |
-| `req_requirements` in `pytest.ini` | `tracereq_requirements` |
-| `-p reqmark` / `-p no:reqmark` | `-p tracereq` / `-p no:tracereq` |
 
 ### Declare requirements
 
