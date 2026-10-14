@@ -17,14 +17,14 @@ requirements = ["REQ-001", "REQ-002"]
 ```ini
 # pytest.ini
 [pytest]
-tracereq_requirements =
+tracereq =
     REQ-001
     REQ-002
 ```
 
 Accepted configuration decisions:
 
-- `tracereq_requirements` uses one ID per line in `pytest.ini`.
+- `tracereq` uses one ID per line in `pytest.ini`.
 - If both files declare inventories, fail with a message naming both files rather
   than merge them or silently choose one. A `pytest.ini` without an inventory can
   coexist with an inventory in `pyproject.toml`.
@@ -34,7 +34,7 @@ Accepted configuration decisions:
   one positional string ID and no keyword arguments. Multiple IDs use multiple markers.
 
 Project naming is fixed: distribution and repository `pytest-tracereq`, Python
-package `tracereq`, pytest entry point `tracereq`, and TOML inventory
+package `pytest_tracereq`, pytest entry point `tracereq`, and TOML inventory
 section `[tool.tracereq]`.
 
 Confirmed requirement: zero declared requirements means success with zero
@@ -110,7 +110,7 @@ collection, but `verified` must remain false when collection errors exist.
 
 When terminal colors are enabled, the entire acceptance report is red if
 `summary.verified` is false, both with `--tracereq-report` and `--tracereq-strict`.
-Successful verification retains the normal color, including zero requirements
+Successful verification makes the entire report green, including zero requirements
 and runs with failing unmarked tests. The report respects pytest's color
 settings, including `--color=no`.
 

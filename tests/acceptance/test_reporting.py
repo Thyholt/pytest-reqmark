@@ -98,13 +98,14 @@ def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
         ),
     ],
 )
-def test_a_verified_terminal_report_is_not_red(
-    user_project, read_report, requirements, scenario, expected_exit, coverage
+@pytest.mark.parametrize("report_option", ["--tracereq-report", "--tracereq-strict"])
+def test_a_verified_terminal_report_is_green(
+    user_project, read_report, requirements, scenario, expected_exit, coverage, report_option
 ):
     project = user_project(requirements, scenario)
 
     result = project.runpytest_subprocess(
-        "--tracereq-report", "--color=yes", "--tracereq-json=report.json"
+        report_option, "--color=yes", "--tracereq-json=report.json"
     )
 
     assert result.ret == expected_exit
@@ -117,18 +118,26 @@ def test_a_verified_terminal_report_is_not_red(
         index for index, line in enumerate(result.stdout.lines) if f"Coverage: {coverage}" in line
     )
     assert all(
-        "\x1b[31m" not in line for line in result.stdout.lines[report_start : report_end + 1]
+        line.startswith("\x1b[32m") and line.endswith("\x1b[0m")
+        for line in result.stdout.lines[report_start : report_end + 1]
     )
 
 
-def test_terminal_report_color_can_be_disabled(user_project):
-    project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
+@pytest.mark.parametrize(
+    ("requirements", "scenario", "coverage"),
+    [
+        pytest.param(["REQ-001"], all_requirements_pass, "100.0%", id="verified"),
+        pytest.param(["REQ-001", "REQ-002", "REQ-003"], summary, "33.3%", id="unverified"),
+    ],
+)
+def test_terminal_report_color_can_be_disabled(user_project, requirements, scenario, coverage):
+    project = user_project(requirements, scenario)
 
     result = project.runpytest_subprocess("--tracereq-report", "--color=no")
 
     assert result.ret == pytest.ExitCode.OK
     assert "\x1b[" not in result.stdout.str()
-    result.stdout.fnmatch_lines(["*tracereq*", "Coverage: 33.3%"])
+    result.stdout.fnmatch_lines(["*tracereq*", f"Coverage: {coverage}"])
 
 
 def test_json_report_includes_all_requirements_individual_tests_and_summary(
@@ -171,7 +180,7 @@ def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
     project = user_project([], empty_inventory)
     if config_file == "pytest.ini":
         (project.path / "pyproject.toml").unlink()
-        project.makefile(".ini", pytest="[pytest]\ntracereq_requirements =\n")
+        project.makefile(".ini", pytest="[pytest]\ntracereq =\n")
 
     result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
 

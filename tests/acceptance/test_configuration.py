@@ -19,7 +19,7 @@ from tests.acceptance.scenarios.configuration import (
 def test_requirements_can_be_declared_in_pytest_ini(user_project, read_report):
     project = user_project(["REQ-001"], pytest_ini_inventory)
     (project.path / "pyproject.toml").unlink()
-    project.makefile(".ini", pytest="[pytest]\ntracereq_requirements =\n    REQ-001\n    REQ-002\n")
+    project.makefile(".ini", pytest="[pytest]\ntracereq =\n    REQ-001\n    REQ-002\n")
 
     result = project.runpytest_subprocess("--tracereq-json=report.json")
 
@@ -44,7 +44,7 @@ def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
 
 def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project):
     project = user_project(["REQ-001"], conflicting_inventories)
-    project.makefile(".ini", pytest="[pytest]\ntracereq_requirements =\n    REQ-002\n")
+    project.makefile(".ini", pytest="[pytest]\ntracereq =\n    REQ-002\n")
 
     result = project.runpytest_subprocess("--tracereq-report")
 
@@ -57,8 +57,8 @@ def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project
 @pytest.mark.parametrize(
     ("filename", "content"),
     [
-        ("setup.cfg", "[tool:pytest]\ntracereq_requirements = REQ-001\n"),
-        ("tox.ini", "[pytest]\ntracereq_requirements = REQ-001\n"),
+        ("setup.cfg", "[tool:pytest]\ntracereq = REQ-001\n"),
+        ("tox.ini", "[pytest]\ntracereq = REQ-001\n"),
         ("requirements.json", '{"requirements": ["REQ-001"]}'),
         ("requirements.yaml", "requirements:\n  - REQ-001\n"),
     ],
@@ -113,7 +113,7 @@ def test_no_requirement_configuration_means_success_with_zero_requirements(
 def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(user_project):
     project = user_project(["REQ-001"], duplicate_ini_ids)
     (project.path / "pyproject.toml").unlink()
-    project.makefile(".ini", pytest="[pytest]\ntracereq_requirements =\n    REQ-001\n    REQ-001\n")
+    project.makefile(".ini", pytest="[pytest]\ntracereq =\n    REQ-001\n    REQ-001\n")
 
     result = project.runpytest_subprocess()
 
@@ -131,7 +131,7 @@ def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
     if config_file != "pyproject.toml":
         (project.path / "pyproject.toml").unlink()
     if config_file == "pytest.ini":
-        project.makefile(".ini", pytest="[pytest]\ntracereq_requirements =\n")
+        project.makefile(".ini", pytest="[pytest]\ntracereq =\n")
 
     result = project.runpytest_subprocess()
 
@@ -144,8 +144,8 @@ def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
 @pytest.mark.parametrize(
     ("filename", "content"),
     [
-        ("setup.cfg", "[tool:pytest]\ntracereq_requirements = REQ-001\n"),
-        ("tox.ini", "[pytest]\ntracereq_requirements = REQ-001\n"),
+        ("setup.cfg", "[tool:pytest]\ntracereq = REQ-001\n"),
+        ("tox.ini", "[pytest]\ntracereq = REQ-001\n"),
         ("requirements.json", '{"requirements": ["REQ-001"]}'),
         ("requirements.yaml", "requirements:\n  - REQ-001\n"),
     ],

@@ -6,10 +6,10 @@ from pathlib import Path
 import pytest
 from _pytest.terminal import TerminalReporter
 
-from tracereq.collector import requirement_ids
-from tracereq.config import load_requirements
-from tracereq.outcomes import aggregate, phase_outcome
-from tracereq.reporting import build_report, write_json, write_terminal
+from pytest_tracereq.collector import requirement_ids
+from pytest_tracereq.config import load_requirements
+from pytest_tracereq.outcomes import aggregate, phase_outcome
+from pytest_tracereq.reporting import build_report, write_json, write_terminal
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -22,9 +22,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         "--tracereq-json", metavar="PATH", help="Write requirement verification as JSON"
     )
 
-    parser.addini(
-        "tracereq_requirements", "Requirement IDs, one per line (pytest.ini only)", "linelist"
-    )
+    parser.addini("tracereq", "Requirement IDs, one per line (pytest.ini only)", "linelist")
 
 
 def pytest_configure(config: pytest.Config) -> None:

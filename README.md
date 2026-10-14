@@ -1,6 +1,6 @@
-# tracereq
+# pytest-tracereq
 
-Stupid simple requirement marking and tracking for pytest.
+Requirement marking and tracing for pytest.
 
 ## Usage
 
@@ -10,21 +10,6 @@ automatically. Python 3.10+ and pytest 8+ are supported.
 ```sh
 pip install pytest-tracereq
 ```
-
-### Migrating from pytest-reqmark
-
-Uninstall `pytest-reqmark` before installing `pytest-tracereq`; both plugins must
-not be installed together. Replace Python imports of `pytest_reqmark` with `tracereq`.
-Update existing projects as follows; the old names are no longer supported.
-
-| Previous name | New name |
-| --- | --- |
-| `pytest.mark.req(...)` | `pytest.mark.tracereq(...)` |
-| `pytest -m req` | `pytest -m tracereq` |
-| `--req-report`, `--req-strict`, `--req-json` | `--tracereq-report`, `--tracereq-strict`, `--tracereq-json` |
-| `[tool.pytest-reqmark]` | `[tool.tracereq]` |
-| `req_requirements` in `pytest.ini` | `tracereq_requirements` |
-| `-p reqmark` / `-p no:reqmark` | `-p tracereq` / `-p no:tracereq` |
 
 ### Declare requirements
 
@@ -39,7 +24,7 @@ Alternatively, use one ID per line in `pytest.ini`.
 
 ```ini
 [pytest]
-tracereq_requirements =
+tracereq =
     REQ-001
     REQ-002
 ```
@@ -75,6 +60,11 @@ pytest --tracereq-json=report.json       # Export statuses and individual test o
 pytest --tracereq-strict                # Report and fail on unverified requirements
 pytest -m tracereq --tracereq-strict    # Run only marked requirement tests
 ```
+
+The report is green when all requirements are verified and red when verification fails.
+The first report shows the example above; the second shows a requirement without tests.
+
+![Terminal reports showing verified requirements in green and a missing requirement in red.](https://raw.githubusercontent.com/Thyholt/pytest-tracereq/master/docs/images/terminal-reports.png)
 
 ### Read requirement statuses
 
@@ -117,9 +107,8 @@ Coverage is the percentage of declared requirements that are verified. With
 no declared requirements and no errors while finding tests, the acceptance
 check succeeds and coverage is 0.0%.
 
-The terminal report is red when acceptance verification fails. This includes
-errors while finding tests, even at 100% coverage. It follows pytest's color
-settings, so `--color=no` disables color.
+Errors while finding tests make verification fail, even at 100% coverage. The report follows
+pytest's color settings, so `--color=no` disables color.
 
 For a complete report, let pytest find the whole test suite. With `-k` or `-m`,
 the plugin still knows about the tests excluded by the filter and reports marked
