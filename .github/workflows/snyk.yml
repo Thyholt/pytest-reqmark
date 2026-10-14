@@ -1,0 +1,59 @@
+name: Snyk
+
+on:
+  push:
+    branches: [master]
+
+  pull_request:
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependencies:
+    name: Snyk dependency scan
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Snyk authentication
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -z "$SNYK_TOKEN" ]; then
+            echo "::error::Add the SNYK_TOKEN repository secret to enable vulnerability scanning."
+            exit 1
+          fi
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Prepare locked dependencies
+        run: |
+          uv export --locked --no-hashes --no-emit-project \
+            --output-file "$RUNNER_TEMP/snyk-requirements.txt"
+          uv venv --seed --python 3.10 "$RUNNER_TEMP/snyk-venv"
+          uv pip install --python "$RUNNER_TEMP/snyk-venv/bin/python" \
+            -r "$RUNNER_TEMP/snyk-requirements.txt"
+
+      - uses: snyk/actions/setup@11b673cfb4b0dc0d860a1323caa199d54950dcce
+
+      - name: Scan dependencies
+        id: scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk test --file="$RUNNER_TEMP/snyk-requirements.txt" \
+            --package-manager=pip --command="$RUNNER_TEMP/snyk-venv/bin/python" \
+            --json-file-output="$RUNNER_TEMP/snyk-results.json"
+
+      - name: Save vulnerability report
+        if: always() && steps.scan.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-results
+          path: ${{ runner.temp }}/snyk-results.json
+          if-no-files-found: ignore
