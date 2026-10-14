@@ -6,10 +6,7 @@ from tests.acceptance.scenarios.reporting import empty_inventory, summary
 
 
 def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(user_project):
-    project = user_project(
-        ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"],
-        summary,
-    )
+    project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
     result = project.runpytest_subprocess("--req-report")
 
@@ -17,9 +14,9 @@ def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(use
     result.stdout.fnmatch_lines(
         [
             "*pytest-reqmark*",
-            "*training.yolo.config*PASSED*2*",
-            "*training.rfdetr.config*MISSING*0*",
-            "*dataset.versioning*SKIPPED*1*",
+            "*REQ-001*PASSED*2*",
+            "*REQ-002*MISSING*0*",
+            "*REQ-003*SKIPPED*1*",
             "*Requirements:*3*",
             "*Passed:*1*",
             "*Unverified:*2*",
@@ -31,10 +28,7 @@ def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(use
 def test_json_report_includes_all_requirements_individual_tests_and_summary(
     user_project, read_report
 ):
-    project = user_project(
-        ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"],
-        summary,
-    )
+    project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
     result = project.runpytest_subprocess("--req-json=report.json")
 
@@ -49,17 +43,17 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
         "collection_errors": 0,
     }
     assert report["requirements"] == {
-        "training.yolo.config": {
+        "REQ-001": {
             "status": "PASSED",
             "tests": [
-                {"nodeid": "test_behavior.py::test_parameters_logged", "outcome": "PASSED"},
-                {"nodeid": "test_behavior.py::test_source_logged", "outcome": "PASSED"},
+                {"nodeid": "test_behavior.py::test_first_behavior", "outcome": "PASSED"},
+                {"nodeid": "test_behavior.py::test_second_behavior", "outcome": "PASSED"},
             ],
         },
-        "training.rfdetr.config": {"status": "MISSING", "tests": []},
-        "dataset.versioning": {
+        "REQ-002": {"status": "MISSING", "tests": []},
+        "REQ-003": {
             "status": "SKIPPED",
-            "tests": [{"nodeid": "test_behavior.py::test_version_stable", "outcome": "SKIPPED"}],
+            "tests": [{"nodeid": "test_behavior.py::test_third_behavior", "outcome": "SKIPPED"}],
         },
     }
 

@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.req("training.yolo.config")
+@pytest.mark.req("requirement.group.item")
 def test_behavior():
     pass

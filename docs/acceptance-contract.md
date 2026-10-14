@@ -45,6 +45,10 @@ A marked test referencing an undeclared ID is still rejected.
 
 ## User-facing acceptance scenarios
 
+Acceptance examples use domain-neutral requirement IDs and test names. IDs remain
+opaque strings, including dotted IDs such as `requirement.group.item` and IDs
+containing Unicode, spaces or punctuation.
+
 | Test file | What a user can rely on |
 | --- | --- |
 | `test_configuration.py` | Only the two supported files supply requirement inventories; conflicts are explained. |
