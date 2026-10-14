@@ -57,8 +57,9 @@ jobs:
           print(f"Installed {package.metadata['Name']} {package.version}: {pytest_reqmark.__file__}")
           PY
 
-      - name: Run acceptance scenarios against the installed wheel outside the source tree
+      - name: Verify acceptance and public examples against the installed wheel
         working-directory: /tmp
         run: >-
           /tmp/acceptance-integration/bin/python -m pytest
-          "$GITHUB_WORKSPACE/tests/acceptance" --import-mode=prepend --tb=short -ra
+          "$GITHUB_WORKSPACE/tests/acceptance"
+          "$GITHUB_WORKSPACE/examples/test_examples.py" --import-mode=prepend --tb=short -ra

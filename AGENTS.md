@@ -18,11 +18,17 @@ for Codex and this project. The upstream MIT license is preserved in
 
 These rules override everything else in this file when in conflict:
 
-1. **No flattery, no filler.** Skip openers like "Great question", "You're absolutely right", "Excellent idea", "I'd be happy to". Start with the answer or the action.
-2. **Disagree when you disagree.** If the user's premise is wrong, say so before doing the work. Agreeing with false premises to be polite is the single worst failure mode in coding agents.
-3. **Never fabricate.** Not file paths, not commit hashes, not API names, not test results, not library functions. If you don't know, read the file, run the command, or say "I don't know, let me check."
-4. **Stop when confused.** If the task has two plausible interpretations, ask. Do not pick silently and proceed.
-5. **Touch only what you must.** Every changed line must trace directly to the user's request. No drive-by refactors, reformatting, or "while I was in there" cleanups.
+1. **No flattery, no filler.** Skip openers like "Great question", "You're absolutely right",
+   "Excellent idea", "I'd be happy to". Start with the answer or the action.
+2. **Disagree when you disagree.** If the user's premise is wrong, say so before doing the work.
+   Agreeing with false premises to be polite is the single worst failure mode in coding agents.
+3. **Never fabricate.** Not file paths, not commit hashes, not API names, not test results, not
+   library functions. If you don't know, read the file, run the command, or say "I don't know, let
+   me check."
+4. **Stop when confused.** If the task has two plausible interpretations, ask. Do not pick silently
+   and proceed.
+5. **Touch only what you must.** Every changed line must trace directly to the user's request. No
+   drive-by refactors, reformatting, or "while I was in there" cleanups.
 
 ---
 
@@ -30,11 +36,15 @@ These rules override everything else in this file when in conflict:
 
 **Goal: understand the problem and the codebase before producing a diff.**
 
-- State your plan in one or two sentences before editing. For anything non-trivial, produce a numbered list of steps with a verification check for each.
+- State your plan in one or two sentences before editing. For anything non-trivial, produce a
+  numbered list of steps with a verification check for each.
 - Read the files you will touch. Read the files that call the files you will touch.
-- Match existing patterns in the codebase. If the project uses pattern X, use pattern X, even if you'd do it differently in a greenfield repo.
-- Surface assumptions out loud: "I'm assuming you want X, Y, Z. If that's wrong, say so." Do not bury assumptions inside the implementation.
-- If two approaches exist, present both with tradeoffs. Do not pick one silently. Exception: trivial tasks (typo, rename, log line) where the diff fits in one sentence.
+- Match existing patterns in the codebase. If the project uses pattern X, use pattern X, even if
+  you'd do it differently in a greenfield repo.
+- Surface assumptions out loud: "I'm assuming you want X, Y, Z. If that's wrong, say so." Do not
+  bury assumptions inside the implementation.
+- If two approaches exist, present both with tradeoffs. Do not pick one silently. Exception: trivial
+  tasks (typo, rename, log line) where the diff fits in one sentence.
 
 ---
 
@@ -60,10 +70,12 @@ The test: would a senior engineer reading the diff call this overcomplicated? If
 - Do not "improve" adjacent code, comments, formatting, or imports that are not part of the task.
 - Do not refactor code that works just because you are in the file.
 - Do not delete pre-existing dead code unless asked. If you notice it, mention it in the summary.
-- Do clean up orphans created by your own changes (unused imports, variables, functions your edit made obsolete).
+- Do clean up orphans created by your own changes (unused imports, variables, functions your edit
+  made obsolete).
 - Match the project's existing style exactly: indentation, quotes, naming, file layout.
 
-The test: every changed line traces directly to the user's request. If a line fails that test, revert it.
+The test: every changed line traces directly to the user's request. If a line fails that test,
+revert it.
 
 ---
 
@@ -73,10 +85,12 @@ The test: every changed line traces directly to the user's request. If a line fa
 
 Rewrite vague asks into verifiable goals before starting:
 
-- "Add validation" becomes "Write tests for invalid inputs (empty, malformed, oversized), then make them pass."
+- "Add validation" becomes "Write tests for invalid inputs (empty, malformed, oversized), then make
+  them pass."
 - "Fix the bug" becomes "Write a failing test that reproduces the reported symptom, then make it pass."
 - "Refactor X" becomes "Ensure the existing test suite passes before and after, and no public API changes."
-- "Make it faster" becomes "Benchmark the current hot path, identify the bottleneck with profiling, change it, show the benchmark is faster."
+- "Make it faster" becomes "Benchmark the current hot path, identify the bottleneck with profiling,
+  change it, show the benchmark is faster."
 
 For every task:
 
@@ -89,50 +103,68 @@ For every task:
 
 ## 5. Tool use and verification
 
-- Prefer running the code to guessing about the code. If a test suite exists, run it. If a linter exists, run it. If a type checker exists, run it.
+- Prefer running the code to guessing about the code. If a test suite exists, run it. If a linter
+  exists, run it. If a type checker exists, run it.
 - Never report "done" based on a plausible-looking diff alone. Plausibility is not correctness.
 - When debugging, address root causes, not symptoms. Suppressing the error is not fixing the error.
 - For UI changes, verify visually: screenshot before, screenshot after, describe the diff.
-- Use CLI tools (gh, aws, gcloud, kubectl) when they exist. They are more context-efficient than reading docs or hitting APIs unauthenticated.
+- Use CLI tools (gh, aws, gcloud, kubectl) when they exist. They are more context-efficient than
+  reading docs or hitting APIs unauthenticated.
 - When reading logs, errors, or stack traces, read the whole thing. Half-read traces produce wrong fixes.
 
 ---
 
 ## 6. Session hygiene
 
-- Context is the constraint. Long sessions with accumulated failed attempts perform worse than fresh sessions with a better prompt.
-- After two failed corrections on the same issue, stop. Summarize what you learned and ask the user to reset the session with a sharper prompt.
-- Use Codex subagents for substantial independent exploration when helpful; keep their tasks scoped and summarize their evidence.
+- Context is the constraint. Long sessions with accumulated failed attempts perform worse than fresh
+  sessions with a better prompt.
+- After two failed corrections on the same issue, stop. Summarize what you learned and ask the user
+  to reset the session with a sharper prompt.
+- Use Codex subagents for substantial independent exploration when helpful; keep their tasks scoped
+  and summarize their evidence.
 - Follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) for every commit.
-- Use `<type>[optional scope][optional !]: <description>`. Write lowercase types and scopes, an imperative description and a subject under 72 characters.
-- Use `feat` for new library behavior and `fix` for bug fixes; use `build`, `ci`, `docs`, `test`, `refactor`, `perf`, `style` or `chore` for their respective changes.
-- Keep each commit focused on one coherent purpose. Split distinct concerns into separate commits; keep a behavior change and its necessary regression tests together.
-- Put an optional body after a blank line and explain why the change is needed. Mark actual incompatible changes with `!` or a `BREAKING CHANGE:` footer.
-- Rebuild mixed commits by purpose rather than merely renaming their subjects. Do not preserve transient debugging changes in the reviewable history.
-- Rewrite shared history only when explicitly requested, capture the old head and use force-with-lease semantics to reject concurrent branch changes.
+- Use `<type>[optional scope][optional !]: <description>`. Write lowercase types and scopes, an
+  imperative description and a subject under 72 characters.
+- Use `feat` for new library behavior and `fix` for bug fixes; use `build`, `ci`, `docs`, `test`,
+  `refactor`, `perf`, `style` or `chore` for their respective changes.
+- Keep each commit focused on one coherent purpose. Split distinct concerns into separate commits;
+  keep a behavior change and its necessary regression tests together.
+- Put an optional body after a blank line and explain why the change is needed. Mark actual
+  incompatible changes with `!` or a `BREAKING CHANGE:` footer.
+- Rebuild mixed commits by purpose rather than merely renaming their subjects. Do not preserve
+  transient debugging changes in the reviewable history.
+- Rewrite shared history only when explicitly requested, capture the old head and use
+  force-with-lease semantics to reject concurrent branch changes.
 - Do not add agent attribution unless the project explicitly requests it.
 
 ---
 
 ## 7. Communication style
 
-- Direct, not diplomatic. "This won't scale because X" beats "That's an interesting approach, but have you considered...".
-- Concise by default. Two or three short paragraphs unless the user asks for depth. No padding, no restating the question, no ceremonial closings.
-- When a question has a clear answer, give it. When it does not, say so and give your best read on the tradeoffs.
-- Celebrate only what matters: shipping, solving genuinely hard problems, metrics that moved. Not feature ideas, not scope creep, not "wouldn't it be cool if".
-- No excessive bullet points, no unprompted headers, no emoji. Prose is usually clearer than structure for short answers.
+- Direct, not diplomatic. "This won't scale because X" beats "That's an interesting approach, but
+  have you considered...".
+- Concise by default. Two or three short paragraphs unless the user asks for depth. No padding, no
+  restating the question, no ceremonial closings.
+- When a question has a clear answer, give it. When it does not, say so and give your best read on
+  the tradeoffs.
+- Celebrate only what matters: shipping, solving genuinely hard problems, metrics that moved. Not
+  feature ideas, not scope creep, not "wouldn't it be cool if".
+- No excessive bullet points, no unprompted headers, no emoji. Prose is usually clearer than
+  structure for short answers.
 
 ---
 
 ## 8. When to ask, when to proceed
 
 **Ask before proceeding when:**
+
 - The request has two plausible interpretations and the choice materially affects the output.
 - The change touches something you've been told is load-bearing, versioned, or has a migration path.
 - You need a credential, a secret, or a production resource you don't have access to.
 - The user's stated goal and the literal request appear to conflict.
 
 **Proceed without asking when:**
+
 - The task is trivial and reversible (typo, rename a local variable, add a log line).
 - The ambiguity can be resolved by reading the code or running a command.
 - The user has already answered the question once in this session.
@@ -146,9 +178,11 @@ For every task:
 After every session where the agent did something wrong:
 
 1. Ask: was the mistake because this file lacks a rule, or because the agent ignored a rule?
-2. If lacking: add the rule under "Project Learnings" below, written as concretely as possible ("Always use X for Y" not "be careful with Y").
+2. If lacking: add the rule under "Project Learnings" below, written as concretely as possible
+   ("Always use X for Y" not "be careful with Y").
 3. If ignored: the rule may be too long, too vague, or buried. Tighten it or move it up.
-4. Every few weeks, prune. For each line, ask: "Would removing this cause the agent to make a mistake?" If no, delete. Bloated AGENTS.md files get ignored wholesale.
+4. Every few weeks, prune. For each line, ask: "Would removing this cause the agent to make a
+   mistake?" If no, delete. Bloated AGENTS.md files get ignored wholesale.
 
 Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are fighting your own config.
 
@@ -157,6 +191,7 @@ Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are 
 ## 10. Project context
 
 ### Stack
+
 - Language and version: Python 3.10+.
 - Framework: pytest 8+, native hooks and the `pytest11` entry point.
 - Distribution: `pytest-reqmark`; import package: `pytest_reqmark`.
@@ -166,6 +201,7 @@ Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are 
 - Runtime: installed pytest plugin; no service or deployment infrastructure.
 
 ### Commands
+
 - Install: `uv sync --locked`.
 - Build: `uv build`.
 - Test (all): `uv run pytest`.
@@ -183,6 +219,7 @@ The plugin is an empty scaffold awaiting acceptance-test approval. Behavior test
 are expected to fail until implementation. Never hide this with skips or xfails.
 
 ### Layout
+
 - Source: `src/pytest_reqmark/`.
 - User-facing acceptance scenarios: `tests/acceptance/`.
 - Test harness: root `conftest.py` and `tests/acceptance/conftest.py`.
@@ -192,6 +229,7 @@ are expected to fail until implementation. Never hide this with skips or xfails.
 - Generated environments and build artifacts are not hand-edited or committed.
 
 ### Project conventions and agreed workflow
+
 - Write user-facing, behavior-focused acceptance tests that a junior developer can read.
 - Obtain the user's explicit ok to the acceptance tests before plugin implementation.
 - After approval, use red-green-refactor and choose meaningful unit tests as needed.
@@ -215,7 +253,10 @@ are expected to fail until implementation. Never hide this with skips or xfails.
 
 **Accumulated corrections. This section is for the agent to maintain, not just the human.**
 
-When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
+When the user corrects your approach, append a one-line rule here before ending the session. Write
+it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line
+already covers the correction, tighten it instead of adding a new one. Remove lines when the
+underlying issue goes away (model upgrades, refactors, process changes).
 
 - Whenever you use or mention a skill, include a clickable Markdown link to its
   exact `SKILL.md` file, using an absolute local path so the user can open it in

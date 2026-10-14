@@ -1,0 +1,5 @@
+[tool.pytest-reqmark]
+requirements = ["REQ-001", "REQ-002"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]

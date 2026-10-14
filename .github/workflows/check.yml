@@ -22,7 +22,7 @@ jobs:
             command: prek run --all-files
 
           - name: collection
-            command: pytest tests/acceptance --collect-only -q
+            command: pytest --collect-only -q
 
           - name: tests
             command: pytest --tb=short -q
