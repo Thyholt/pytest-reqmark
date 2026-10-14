@@ -4,22 +4,26 @@ import pytest
 
 from tests.acceptance.expectations import expected
 from tests.acceptance.scenarios.statuses import (
+    assertion_with_xpass_text,
     both_tests_pass,
     deselection_over_pass,
     early_stop,
     failure_over_xpass,
     fixture_skip,
     setup_error_over_failure,
+    setup_xfail,
     skip_over_deselection,
     strict_xpass,
     teardown_error_after_failure,
     teardown_error_after_pass,
+    teardown_xfail,
     xfail_over_skip,
     xpass_over_xfail,
 )
 from tests.acceptance.scenarios.statuses.partial_verification import (
     one_failed_test,
     one_skipped_test,
+    one_unexecuted_test,
 )
 from tests.acceptance.scenarios.statuses.reported_outcome import (
     expected_failure,
@@ -93,6 +97,32 @@ def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
     )
 
 
+@pytest.mark.parametrize(
+    "scenario",
+    [pytest.param(setup_xfail, id="setup"), pytest.param(teardown_xfail, id="teardown")],
+)
+@pytest.mark.parametrize(
+    ("options", "expected_exit"),
+    [
+        pytest.param((), pytest.ExitCode.OK, id="report"),
+        pytest.param(("--req-strict",), pytest.ExitCode.TESTS_FAILED, id="strict"),
+    ],
+)
+def test_fixture_expected_failures_are_xfailed_and_keep_requirements_unverified(
+    user_project, read_report, scenario, options, expected_exit
+):
+    project = user_project(["REQ-001"], scenario)
+
+    result = project.runpytest_subprocess("--req-json=report.json", *options)
+
+    assert result.ret == expected_exit
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="XFAILED", tests=[("test_behavior.py::test_behavior", "XFAILED")]
+    )
+    assert report["summary"]["verified"] is False
+
+
 def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, read_report):
     project = user_project(["REQ-001"], strict_xpass)
 
@@ -104,6 +134,19 @@ def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, 
         status="XPASSED",
         tests=[("test_behavior.py::test_behavior", "XPASSED")],
     )
+
+
+def test_an_assertion_mentioning_xpass_is_reported_as_failed(user_project, read_report):
+    project = user_project(["REQ-001"], assertion_with_xpass_text)
+
+    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+
+    assert result.ret == pytest.ExitCode.TESTS_FAILED
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="FAILED", tests=[("test_behavior.py::test_behavior", "FAILED")]
+    )
+    assert report["summary"]["verified"] is False
 
 
 @pytest.mark.parametrize(
@@ -319,3 +362,35 @@ def test_early_stop_reports_a_collected_but_unexecuted_test_as_skipped(user_proj
         status="SKIPPED", tests=[("test_behavior.py::test_second", "SKIPPED")]
     )
     assert report["summary"]["verified"] is False
+
+
+@pytest.mark.parametrize(
+    "test_order", [("test_first", "test_second"), ("test_second", "test_first")]
+)
+def test_a_passing_test_does_not_verify_a_requirement_when_another_test_never_runs(
+    user_project, read_report, test_order
+):
+    project = user_project(["REQ-001"], one_unexecuted_test)
+    node_ids = [
+        f"test_behavior.py::{test_order[0]}",
+        "test_behavior.py::test_unmarked_failure",
+        f"test_behavior.py::{test_order[1]}",
+    ]
+
+    result = project.runpytest_subprocess(
+        "--maxfail=1", "--req-strict", "--req-json=report.json", *node_ids
+    )
+
+    assert result.ret == pytest.ExitCode.TESTS_FAILED
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="SKIPPED", tests=[(node_ids[0], "PASSED"), (node_ids[2], "SKIPPED")]
+    )
+    assert report["summary"] == {
+        "requirements": 1,
+        "passed": 0,
+        "unverified": 1,
+        "coverage": 0.0,
+        "verified": False,
+        "collection_errors": 0,
+    }
