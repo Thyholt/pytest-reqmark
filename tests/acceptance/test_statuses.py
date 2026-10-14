@@ -6,6 +6,7 @@ from tests.acceptance.expectations import expected
 from tests.acceptance.scenarios.statuses import (
     both_tests_pass,
     deselection_over_pass,
+    early_stop,
     failure_over_xpass,
     fixture_skip,
     setup_error_over_failure,
@@ -281,5 +282,40 @@ def test_one_passing_test_does_not_verify_a_requirement_with_an_unverified_test(
             ("test_behavior.py::test_first", "PASSED"),
             ("test_behavior.py::test_second", status),
         ],
+    )
+    assert report["summary"]["verified"] is False
+
+
+def test_collect_only_keeps_associated_tests_unverified(user_project, read_report):
+    project = user_project(["REQ-001"], both_tests_pass)
+
+    result = project.runpytest_subprocess(
+        "--collect-only", "--req-strict", "--req-json=report.json"
+    )
+
+    assert result.ret == pytest.ExitCode.TESTS_FAILED
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="SKIPPED",
+        tests=[
+            ("test_behavior.py::test_first", "SKIPPED"),
+            ("test_behavior.py::test_second", "SKIPPED"),
+        ],
+    )
+    assert report["summary"]["verified"] is False
+
+
+def test_early_stop_reports_a_collected_but_unexecuted_test_as_skipped(user_project, read_report):
+    project = user_project(["REQ-001", "REQ-002"], early_stop)
+
+    result = project.runpytest_subprocess("--maxfail=1", "--req-strict", "--req-json=report.json")
+
+    assert result.ret != pytest.ExitCode.OK
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="FAILED", tests=[("test_behavior.py::test_first", "FAILED")]
+    )
+    assert expected(report["requirements"]["REQ-002"]).to_have(
+        status="SKIPPED", tests=[("test_behavior.py::test_second", "SKIPPED")]
     )
     assert report["summary"]["verified"] is False
