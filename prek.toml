@@ -29,6 +29,14 @@ pass_filenames = false
 always_run = true
 
 [[repos.hooks]]
+id = "rumdl"
+name = "Markdown lint"
+entry = "uv run --locked rumdl check ."
+language = "system"
+pass_filenames = false
+always_run = true
+
+[[repos.hooks]]
 id = "ty"
 name = "Type checking"
 entry = "uv run --locked ty check"

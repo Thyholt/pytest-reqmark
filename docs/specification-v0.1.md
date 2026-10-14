@@ -1,8 +1,10 @@
 # pytest-reqmark v0.1 — Refined specification
 
-**Goal:** A lightweight, domain-agnostic pytest plugin that makes existing tests executable acceptance criteria.
+**Goal:** A lightweight, domain-agnostic pytest plugin that makes existing tests executable
+acceptance criteria.
 
-The plugin manages requirement IDs, collects test outcomes, reports verification status, and optionally enforces acceptance coverage.
+The plugin manages requirement IDs, collects test outcomes, reports verification status, and
+optionally enforces acceptance coverage.
 
 ## 1. Core principles
 
@@ -12,7 +14,8 @@ The plugin manages requirement IDs, collects test outcomes, reports verification
 - One test can verify multiple requirements.
 - Tests remain independent of file paths, modules and implementation details.
 - Requirement granularity is entirely up to the user.
-- **Only requirement-marked tests contribute to acceptance verification.** Unmarked tests are ignored, even when they fail.
+- **Only requirement-marked tests contribute to acceptance verification.** Unmarked tests are
+  ignored, even when they fail.
 
 ## 2. Configuration
 
@@ -99,7 +102,9 @@ Strict mode evaluates **only declared requirements and their associated marked t
 | Unmarked test skipped | Ignored |
 | Unmarked test deselected | Ignored |
 
-**Important distinction:** Strict mode controls the plugin's acceptance verdict, not pytest's ordinary exit status. A failing unmarked test can still make the overall pytest command fail through pytest's standard behavior.
+**Important distinction:** Strict mode controls the plugin's acceptance verdict, not pytest's
+ordinary exit status. A failing unmarked test can still make the overall pytest command fail through
+pytest's standard behavior.
 
 To obtain an acceptance-only CI gate, use:
 
@@ -107,7 +112,9 @@ To obtain an acceptance-only CI gate, use:
 pytest -m req --req-strict
 ```
 
-The plugin should automatically register the `req` marker category or provide an equivalent selection mechanism. Since `@pytest.mark.req("REQ-001")` already registers that marker, `-m req` selects marked tests.
+The plugin should automatically register the `req` marker category or provide an equivalent
+selection mechanism. Since `@pytest.mark.req("REQ-001")` already registers that marker, `-m req`
+selects marked tests.
 
 ## 5. CLI
 
@@ -144,7 +151,8 @@ Verified coverage:
 
 `PASSED requirements / Declared requirements × 100`
 
-The JSON report includes all declared requirements, their statuses and associated test node IDs with individual outcomes.
+The JSON report includes all declared requirements, their statuses and associated test node IDs with
+individual outcomes.
 
 ## 7. Collection and execution rules
 
@@ -160,7 +168,8 @@ The JSON report includes all declared requirements, their statuses and associate
 - A collection error must not result in a successful strict verdict.
 - If a test is never collected, it cannot be identified as deselected.
 
-**Full collection is therefore required for authoritative acceptance coverage.** Filtering with `-m` and `-k` is supported because pytest initially collects those tests.
+**Full collection is therefore required for authoritative acceptance coverage.** Filtering with `-m`
+and `-k` is supported because pytest initially collects those tests.
 
 ## 8. Implementation
 
@@ -183,13 +192,17 @@ pytest-reqmark/
     └── test_cli.py
 ```
 
-Python 3.10+, pytest 8+, native pytest hooks, `pytest11` entry point, and no mandatory dependencies beyond pytest.
+Python 3.10+, pytest 8+, native pytest hooks, `pytest11` entry point, and no mandatory dependencies
+beyond pytest.
 
 ## 9. Release scope
 
-**v0.1 includes:** Requirement IDs, markers, central inventory, eight statuses, aggregation, missing/unknown ID detection, strict enforcement, terminal and JSON reports, and automated plugin tests.
+**v0.1 includes:** Requirement IDs, markers, central inventory, eight statuses, aggregation,
+missing/unknown ID detection, strict enforcement, terminal and JSON reports, and automated plugin
+tests.
 
-**Deferred:** Report merging, requirement filtering, Markdown/HTML reporting, PR comparisons, external integrations, and requirement descriptions.
+**Deferred:** Report merging, requirement filtering, Markdown/HTML reporting, PR comparisons,
+external integrations, and requirement descriptions.
 
 ### Final contract
 
