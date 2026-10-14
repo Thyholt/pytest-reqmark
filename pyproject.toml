@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytest-reqmark"
+version = "0.1.0"
+description = "Executable acceptance criteria for pytest"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pytest>=8"]
+license = "MIT"
+
+[project.entry-points.pytest11]
+reqmark = "pytest_reqmark.plugin"
+
+[dependency-groups]
+dev = [
+    "prek>=0.5.5",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.12",
+    "ty>=0.0.1a16",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pytest_reqmark"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -n auto"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+# Keep specification examples out of automated source formatting.
+extend-exclude = ["docs/specification-v0.1.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ty.environment]
+python-version = "3.10"

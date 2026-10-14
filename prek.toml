@@ -1,0 +1,37 @@
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "check-yaml" },
+    { id = "check-toml" },
+    { id = "check-merge-conflict", args = ["--assume-in-merge"] },
+    { id = "detect-private-key" },
+    { id = "trailing-whitespace", args = ["--check"] },
+    { id = "end-of-file-fixer", args = ["--check"] },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "ruff-check"
+name = "Ruff lint"
+entry = "uv run --locked ruff check ."
+language = "system"
+pass_filenames = false
+always_run = true
+
+[[repos.hooks]]
+id = "ruff-format"
+name = "Ruff formatting"
+entry = "uv run --locked ruff format --check --diff ."
+language = "system"
+pass_filenames = false
+always_run = true
+
+[[repos.hooks]]
+id = "ty"
+name = "Type checking"
+entry = "uv run --locked ty check"
+language = "system"
+pass_filenames = false
+always_run = true
