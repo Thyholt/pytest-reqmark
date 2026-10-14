@@ -31,6 +31,8 @@ Python 3.10 or newer, managed with uv:
 
 ```sh
 uv sync --locked
+uv run prek install
+uv run prek run --all-files
 uv run ruff check .
 uv run ruff format --check .
 uv run ty check
@@ -38,14 +40,21 @@ uv run pytest tests/acceptance --collect-only -q
 uv run pytest
 ```
 
+[prek](https://prek.j178.dev/ci/) runs the same checks before commits and in CI:
+YAML and TOML syntax, merge conflicts, private keys, whitespace, Ruff lint and
+formatting, and ty types. The hooks are configured in [`prek.toml`](prek.toml)
+and use the dependency versions in `uv.lock`.
+They report problems without modifying files; run `uv run ruff check --fix .`
+or `uv run ruff format .` when needed, then stage the fixes and commit again.
+
 Tests run in parallel with [pytest-xdist](https://pytest-xdist.readthedocs.io/en/stable/distribution.html),
 using `-n auto` to select the worker count from the available CPUs.
 Use `uv run pytest -n 0` for serial execution or `uv run pytest -n 4` to choose
 the worker count explicitly. Only the outer suite runs in parallel; each
 acceptance scenario still runs in its own isolated pytest project.
 
-The `check` workflow runs lint, formatting, types, collection and tests independently,
-so a failure in one check cannot hide the others. The `integration` workflow builds a wheel,
+The `check` workflow runs prek, collection and tests as independent jobs.
+Prek runs every hook even if another hook fails. The `integration` workflow builds a wheel,
 installs it into a fresh environment and runs the acceptance suite outside the
 source tree on Python 3.10 with pytest 8 and Python 3.13 with current pytest.
 It verifies automatic plugin discovery through the `pytest11` entry point.

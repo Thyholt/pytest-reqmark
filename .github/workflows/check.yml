@@ -18,14 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: lint
-            command: ruff check .
-
-          - name: format
-            command: ruff format --check --diff .
-
-          - name: types
-            command: ty check
+          - name: pre-commit
+            command: prek run --all-files
 
           - name: collection
             command: pytest tests/acceptance --collect-only -q

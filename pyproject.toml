@@ -16,6 +16,7 @@ reqmark = "pytest_reqmark.plugin"
 
 [dependency-groups]
 dev = [
+    "prek>=0.5.5",
     "pytest-xdist>=3.8.0",
     "ruff>=0.12",
     "ty>=0.0.1a16",
