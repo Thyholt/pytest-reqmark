@@ -3,6 +3,7 @@
 [![PyPI version][pypi-version-badge]][pypi]
 [![Python versions][python-versions-badge]][pypi]
 [![Tests][tests-badge]][tests]
+[![Code coverage][codecov-badge]][codecov]
 
 **Know which requirements your tests actually verify.**
 
@@ -185,3 +186,6 @@ See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
 [python-versions-badge]: https://img.shields.io/badge/python-3.10%2B-blue
 [tests]: https://github.com/Thyholt/pytest-tracereq/actions/workflows/check.yml
 [tests-badge]: https://img.shields.io/github/actions/workflow/status/Thyholt/pytest-tracereq/check.yml?branch=master&label=tests
+
+[codecov]: https://app.codecov.io/gh/Thyholt/pytest-tracereq
+[codecov-badge]: https://codecov.io/gh/Thyholt/pytest-tracereq/branch/master/graph/badge.svg
