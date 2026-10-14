@@ -10,32 +10,32 @@ Declare opaque requirement IDs in either:
 
 ```toml
 # pyproject.toml
-[tool.pytest-reqmark]
+[tool.tracereq]
 requirements = ["REQ-001", "REQ-002"]
 ```
 
 ```ini
 # pytest.ini
 [pytest]
-req_requirements =
+tracereq_requirements =
     REQ-001
     REQ-002
 ```
 
 Accepted configuration decisions:
 
-- `req_requirements` uses one ID per line in `pytest.ini`.
+- `tracereq_requirements` uses one ID per line in `pytest.ini`.
 - If both files declare inventories, fail with a message naming both files rather
   than merge them or silently choose one. A `pytest.ini` without an inventory can
   coexist with an inventory in `pyproject.toml`.
 - No inventory is read from `setup.cfg`, `tox.ini`, JSON, YAML or other files.
   Ordinary pytest may still use its own supported configuration files.
-- Duplicate IDs and non-string IDs are rejected. Each `req` marker takes exactly
+- Duplicate IDs and non-string IDs are rejected. Each `tracereq` marker takes exactly
   one positional string ID and no keyword arguments. Multiple IDs use multiple markers.
 
-Project naming is fixed: distribution and repository `pytest-reqmark`, Python
-package `pytest_reqmark`, pytest entry point `reqmark`, and TOML inventory
-section `[tool.pytest-reqmark]`.
+Project naming is fixed: distribution and repository `pytest-tracereq`, Python
+package `tracereq`, pytest entry point `tracereq`, and TOML inventory
+section `[tool.tracereq]`.
 
 Confirmed requirement: zero declared requirements means success with zero
 requirements, both for an explicitly empty inventory and when no requirement
@@ -109,7 +109,7 @@ still return a failure. Requirement coverage can be 100% after a partial
 collection, but `verified` must remain false when collection errors exist.
 
 When terminal colors are enabled, the entire acceptance report is red if
-`summary.verified` is false, both with `--req-report` and `--req-strict`.
+`summary.verified` is false, both with `--tracereq-report` and `--tracereq-strict`.
 Successful verification retains the normal color, including zero requirements
 and runs with failing unmarked tests. The report respects pytest's color
 settings, including `--color=no`.

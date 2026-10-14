@@ -27,8 +27,7 @@ def user_project(
         pytester.makefile(
             ".toml",
             pyproject=(
-                "[tool.pytest-reqmark]\n"
-                f"requirements = {json.dumps(requirements, ensure_ascii=False)}\n"
+                f"[tool.tracereq]\nrequirements = {json.dumps(requirements, ensure_ascii=False)}\n"
             ),
         )
         return pytester

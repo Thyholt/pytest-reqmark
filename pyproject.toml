@@ -3,7 +3,7 @@ requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pytest-reqmark"
+name = "pytest-tracereq"
 version = "0.2.0"
 description = "Executable acceptance criteria for pytest"
 readme = "README.md"
@@ -12,11 +12,11 @@ dependencies = ["pytest>=8"]
 license = "MIT"
 
 [project.urls]
-Repository = "https://github.com/Thyholt/pytest-reqmark"
-Issues = "https://github.com/Thyholt/pytest-reqmark/issues"
+Repository = "https://github.com/Thyholt/pytest-tracereq"
+Issues = "https://github.com/Thyholt/pytest-tracereq/issues"
 
 [project.entry-points.pytest11]
-reqmark = "pytest_reqmark.plugin"
+tracereq = "tracereq.plugin"
 
 [dependency-groups]
 dev = [
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pytest_reqmark"]
+packages = ["src/tracereq"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "examples/test_examples.py"]

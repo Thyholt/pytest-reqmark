@@ -45,16 +45,16 @@ jobs:
           /tmp/acceptance-integration/bin/python - <<'PY'
           from importlib.metadata import distribution
 
-          import pytest_reqmark
+          import tracereq
 
-          package = distribution("pytest-reqmark")
-          assert package.metadata["Name"] == "pytest-reqmark"
+          package = distribution("pytest-tracereq")
+          assert package.metadata["Name"] == "pytest-tracereq"
           entry_points = [entry for entry in package.entry_points if entry.group == "pytest11"]
           assert len(entry_points) == 1
-          assert entry_points[0].name == "reqmark"
-          assert entry_points[0].value == "pytest_reqmark.plugin"
+          assert entry_points[0].name == "tracereq"
+          assert entry_points[0].value == "tracereq.plugin"
           entry_points[0].load()
-          print(f"Installed {package.metadata['Name']} {package.version}: {pytest_reqmark.__file__}")
+          print(f"Installed {package.metadata['Name']} {package.version}: {tracereq.__file__}")
           PY
 
       - name: Verify acceptance and public examples against the installed wheel

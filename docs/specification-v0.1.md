@@ -1,4 +1,4 @@
-# pytest-reqmark v0.1 — Refined specification
+# tracereq v0.1 — Refined specification
 
 **Goal:** A lightweight, domain-agnostic pytest plugin that makes existing tests executable
 acceptance criteria.
@@ -22,7 +22,7 @@ optionally enforces acceptance coverage.
 `pyproject.toml`
 
 ```toml
-[tool.pytest-reqmark]
+[tool.tracereq]
 requirements = [
     "REQ-001",
     "REQ-002",
@@ -38,17 +38,17 @@ Requirements are declared centrally. No additional metadata is required.
 import pytest
 
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.tracereq("REQ-001")
 def test_first_behavior():
     ...
 
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.tracereq("REQ-001")
 def test_second_behavior():
     ...
 
 
-@pytest.mark.req("REQ-003")
+@pytest.mark.tracereq("REQ-003")
 def test_third_behavior():
     ...
 ```
@@ -56,8 +56,8 @@ def test_third_behavior():
 Multiple markers are supported:
 
 ```python
-@pytest.mark.req("REQ-001")
-@pytest.mark.req("REQ-002")
+@pytest.mark.tracereq("REQ-001")
+@pytest.mark.tracereq("REQ-002")
 def test_shared_behavior():
     ...
 ```
@@ -86,7 +86,7 @@ A requirement is verified only when every associated test passes.
 ## 4. Strict mode
 
 ```bash
-pytest --req-strict
+pytest --tracereq-strict
 ```
 
 Strict mode evaluates **only declared requirements and their associated marked tests**.
@@ -109,11 +109,11 @@ pytest's standard behavior.
 To obtain an acceptance-only CI gate, use:
 
 ```bash
-pytest -m req --req-strict
+pytest -m tracereq --tracereq-strict
 ```
 
-The plugin should automatically register the `req` marker category or provide an equivalent
-selection mechanism. Since `@pytest.mark.req("REQ-001")` already registers that marker, `-m req`
+The plugin should automatically register the `tracereq` marker category or provide an equivalent
+selection mechanism. Since `@pytest.mark.tracereq("REQ-001")` already registers that marker, `-m tracereq`
 selects marked tests.
 
 ## 5. CLI
@@ -121,17 +121,17 @@ selects marked tests.
 | Command | Behavior |
 |---|---|
 | `pytest` | Normal pytest execution |
-| `pytest --req-report` | Print acceptance report |
-| `pytest --req-strict` | Enforce requirement verification |
-| `pytest -m req --req-strict` | Run only requirement-marked tests |
-| `pytest --req-json=report.json` | Export JSON results |
+| `pytest --tracereq-report` | Print acceptance report |
+| `pytest --tracereq-strict` | Enforce requirement verification |
+| `pytest -m tracereq --tracereq-strict` | Run only requirement-marked tests |
+| `pytest --tracereq-json=report.json` | Export JSON results |
 
-`--req-strict` should imply report generation.
+`--tracereq-strict` should imply report generation.
 
 ## 6. Reporting
 
 ```text
-================ pytest-reqmark ================
+================ tracereq ================
 
 Requirement                 Status       Tests
 -----------------------------------------------------
@@ -174,10 +174,10 @@ and `-k` is supported because pytest initially collects those tests.
 ## 8. Implementation
 
 ```text
-pytest-reqmark/
+pytest-tracereq/
 ├── pyproject.toml
 ├── src/
-│   └── pytest_reqmark/
+│   └── tracereq/
 │       ├── __init__.py
 │       ├── plugin.py
 │       ├── config.py

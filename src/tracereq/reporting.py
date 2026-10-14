@@ -8,7 +8,7 @@ from typing import TypedDict
 import pytest
 from _pytest.terminal import TerminalReporter
 
-from pytest_reqmark.outcomes import aggregate
+from tracereq.outcomes import aggregate
 
 
 class TestResult(TypedDict):
@@ -71,14 +71,12 @@ def write_json(report: Report, path: Path) -> None:
     try:
         path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     except OSError as error:
-        raise pytest.UsageError(
-            f"Cannot write pytest-reqmark JSON report {path}: {error}"
-        ) from error
+        raise pytest.UsageError(f"Cannot write tracereq JSON report {path}: {error}") from error
 
 
 def write_terminal(report: Report, terminal: TerminalReporter) -> None:
     red = not report["summary"]["verified"]
-    terminal.write_sep("=", "pytest-reqmark", red=red)
+    terminal.write_sep("=", "tracereq", red=red)
 
     width = max([len("Requirement"), *(len(identifier) for identifier in report["requirements"])])
     terminal.write_line(f"{'Requirement':<{width}}  {'Status':<10}  Tests", red=red)

@@ -37,7 +37,7 @@ def example_project(
 def test_quickstart_verifies_the_pizza(example_project):
     project = example_project(quickstart)
 
-    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1)
@@ -61,7 +61,7 @@ def test_quickstart_verifies_the_pizza(example_project):
 def test_missing_requirement_reports_the_other_sock(example_project):
     project = example_project(missing_requirement)
 
-    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     result.assert_outcomes(passed=1)
@@ -83,7 +83,7 @@ def test_missing_requirement_reports_the_other_sock(example_project):
 def test_partial_verification_keeps_the_cat_unverified(example_project):
     project = example_project(partial_verification)
 
-    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     result.assert_outcomes(passed=1, skipped=1)
@@ -105,7 +105,9 @@ def test_partial_verification_keeps_the_cat_unverified(example_project):
 def test_acceptance_only_verifies_the_duck_without_the_moon_test(example_project):
     project = example_project(acceptance_only)
 
-    result = project.runpytest_subprocess("-m", "req", "--req-strict", "--req-json=report.json")
+    result = project.runpytest_subprocess(
+        "-m", "tracereq", "--tracereq-strict", "--tracereq-json=report.json"
+    )
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1, deselected=1)
@@ -123,7 +125,7 @@ def test_acceptance_only_verifies_the_duck_without_the_moon_test(example_project
 def test_plain_pytest_in_acceptance_only_still_fails_the_moon_test(example_project):
     project = example_project(acceptance_only)
 
-    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     result.assert_outcomes(passed=1, failed=1)
