@@ -108,6 +108,12 @@ errors. A failed unmarked test does not change this verdict, while pytest can
 still return a failure. Requirement coverage can be 100% after a partial
 collection, but `verified` must remain false when collection errors exist.
 
+When terminal colors are enabled, the entire acceptance report is red if
+`summary.verified` is false, both with `--req-report` and `--req-strict`.
+Successful verification retains the normal color, including zero requirements
+and runs with failing unmarked tests. The report respects pytest's color
+settings, including `--color=no`.
+
 A collection error must prevent successful strict verification. Tests cannot
 always be linked to requirement IDs when collection itself fails; the terminal
 must therefore print `Collection errors: 1` inside the acceptance report for a
