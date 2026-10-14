@@ -1,6 +1,9 @@
 # pytest-tracereq
 
-Requirement marking and tracing for pytest.
+**Know which requirements your tests actually verify.**
+
+Link requirements to your existing pytest tests, organize your suite your way, and get a clear
+verification report. Catch gaps locally and enforce verification in CI.
 
 ## Usage
 
