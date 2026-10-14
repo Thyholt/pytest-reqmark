@@ -61,3 +61,5 @@ will experience, and how you verified it. Include a regression test for bug fixe
 Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/),
 for example `docs: clarify requirement reporting`.
 Wait for CI and review before merging.
+
+Maintainers can follow [the release guide](docs/releasing.md) to publish a version.

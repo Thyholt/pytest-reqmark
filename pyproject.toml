@@ -11,6 +11,10 @@ requires-python = ">=3.10"
 dependencies = ["pytest>=8"]
 license = "MIT"
 
+[project.urls]
+Repository = "https://github.com/Thyholt/pytest-reqmark"
+Issues = "https://github.com/Thyholt/pytest-reqmark/issues"
+
 [project.entry-points.pytest11]
 reqmark = "pytest_reqmark.plugin"
 
