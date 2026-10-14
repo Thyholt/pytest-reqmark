@@ -10,7 +10,9 @@ def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(use
         ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"],
         summary,
     )
+
     result = project.runpytest_subprocess("--req-report")
+
     assert result.ret == pytest.ExitCode.OK
     result.stdout.fnmatch_lines(
         [
@@ -33,7 +35,10 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
         ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"],
         summary,
     )
-    assert project.runpytest_subprocess("--req-json=report.json").ret == pytest.ExitCode.OK
+
+    result = project.runpytest_subprocess("--req-json=report.json")
+
+    assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
     assert report["summary"] == {
         "requirements": 3,
@@ -67,9 +72,12 @@ def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
     if config_file == "pytest.ini":
         (project.path / "pyproject.toml").unlink()
         project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n")
+
     result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
-    assert read_report(project) == {
+    report = read_report(project)
+    assert report == {
         "requirements": {},
         "summary": {
             "requirements": 0,

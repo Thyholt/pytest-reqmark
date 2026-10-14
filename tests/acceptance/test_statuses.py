@@ -2,6 +2,7 @@
 
 import pytest
 
+from tests.acceptance.expectations import expected
 from tests.acceptance.scenarios.statuses import (
     both_tests_pass,
     deselection_over_pass,
@@ -48,10 +49,9 @@ def test_the_report_explains_the_outcome_of_a_marked_test(
     project.runpytest_subprocess("--req-json=report.json")
 
     report = read_report(project)
-    assert report["requirements"]["REQ-001"] == {
-        "status": status,
-        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": status}],
-    }
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status=status, tests=[("test_behavior.py::test_behavior", status)]
+    )
     assert report["summary"]["verified"] is (status == "PASSED")
 
 
@@ -61,10 +61,10 @@ def test_teardown_errors_make_a_passing_test_unverified(user_project, read_repor
     result = project.runpytest_subprocess("--req-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-    assert read_report(project)["requirements"]["REQ-001"] == {
-        "status": "ERROR",
-        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": "ERROR"}],
-    }
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="ERROR", tests=[("test_behavior.py::test_behavior", "ERROR")]
+    )
 
 
 def test_teardown_errors_take_precedence_over_a_test_failure(user_project, read_report):
@@ -73,10 +73,10 @@ def test_teardown_errors_take_precedence_over_a_test_failure(user_project, read_
     result = project.runpytest_subprocess("--req-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-    assert read_report(project)["requirements"]["REQ-001"] == {
-        "status": "ERROR",
-        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": "ERROR"}],
-    }
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="ERROR", tests=[("test_behavior.py::test_behavior", "ERROR")]
+    )
 
 
 def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
@@ -85,10 +85,11 @@ def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
     result = project.runpytest_subprocess("--req-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
-    assert read_report(project)["requirements"]["REQ-001"] == {
-        "status": "SKIPPED",
-        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": "SKIPPED"}],
-    }
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="SKIPPED",
+        tests=[("test_behavior.py::test_behavior", "SKIPPED")],
+    )
 
 
 def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, read_report):
@@ -97,10 +98,11 @@ def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, 
     result = project.runpytest_subprocess("--req-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-    assert read_report(project)["requirements"]["REQ-001"] == {
-        "status": "XPASSED",
-        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": "XPASSED"}],
-    }
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="XPASSED",
+        tests=[("test_behavior.py::test_behavior", "XPASSED")],
+    )
 
 
 @pytest.mark.parametrize(
@@ -110,19 +112,17 @@ def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, 
 def test_setup_errors_take_priority_over_test_failures(user_project, read_report, test_order):
     project = user_project(["REQ-001"], setup_error_over_failure)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
+    expected_outcomes = {
+        "test_behavior.py::test_setup_error": "ERROR",
+        "test_behavior.py::test_failure": "FAILED",
+    }
+    expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess("--req-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "ERROR"
-    outcomes = {
-        "test_behavior.py::test_setup_error": "ERROR",
-        "test_behavior.py::test_failure": "FAILED",
-    }
-    assert requirement["tests"] == [
-        {"nodeid": node_id, "outcome": outcomes[node_id]} for node_id in node_ids
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(status="ERROR", tests=expected_tests)
 
 
 @pytest.mark.parametrize(
@@ -132,19 +132,19 @@ def test_setup_errors_take_priority_over_test_failures(user_project, read_report
 def test_failures_take_priority_over_unexpected_passes(user_project, read_report, test_order):
     project = user_project(["REQ-001"], failure_over_xpass)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
+    expected_outcomes = {
+        "test_behavior.py::test_failure": "FAILED",
+        "test_behavior.py::test_unexpected_pass": "XPASSED",
+    }
+    expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess("--req-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "FAILED"
-    outcomes = {
-        "test_behavior.py::test_failure": "FAILED",
-        "test_behavior.py::test_unexpected_pass": "XPASSED",
-    }
-    assert requirement["tests"] == [
-        {"nodeid": node_id, "outcome": outcomes[node_id]} for node_id in node_ids
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="FAILED", tests=expected_tests
+    )
 
 
 @pytest.mark.parametrize(
@@ -159,19 +159,19 @@ def test_unexpected_passes_take_priority_over_expected_failures(
 ):
     project = user_project(["REQ-001"], xpass_over_xfail)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
+    expected_outcomes = {
+        "test_behavior.py::test_unexpected_pass": "XPASSED",
+        "test_behavior.py::test_expected_failure": "XFAILED",
+    }
+    expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess("--req-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.OK
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "XPASSED"
-    outcomes = {
-        "test_behavior.py::test_unexpected_pass": "XPASSED",
-        "test_behavior.py::test_expected_failure": "XFAILED",
-    }
-    assert requirement["tests"] == [
-        {"nodeid": node_id, "outcome": outcomes[node_id]} for node_id in node_ids
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="XPASSED", tests=expected_tests
+    )
 
 
 @pytest.mark.parametrize(
@@ -181,19 +181,19 @@ def test_unexpected_passes_take_priority_over_expected_failures(
 def test_expected_failures_take_priority_over_skips(user_project, read_report, test_order):
     project = user_project(["REQ-001"], xfail_over_skip)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
+    expected_outcomes = {
+        "test_behavior.py::test_expected_failure": "XFAILED",
+        "test_behavior.py::test_skipped": "SKIPPED",
+    }
+    expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess("--req-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.OK
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "XFAILED"
-    outcomes = {
-        "test_behavior.py::test_expected_failure": "XFAILED",
-        "test_behavior.py::test_skipped": "SKIPPED",
-    }
-    assert requirement["tests"] == [
-        {"nodeid": node_id, "outcome": outcomes[node_id]} for node_id in node_ids
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="XFAILED", tests=expected_tests
+    )
 
 
 @pytest.mark.parametrize(
@@ -203,19 +203,19 @@ def test_expected_failures_take_priority_over_skips(user_project, read_report, t
 def test_skips_take_priority_over_deselection(user_project, read_report, test_order):
     project = user_project(["REQ-001"], skip_over_deselection)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
+    expected_outcomes = {
+        "test_behavior.py::test_skipped": "SKIPPED",
+        "test_behavior.py::test_excluded": "DESELECTED",
+    }
+    expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess("--req-json=report.json", *node_ids, "-k", "not excluded")
 
     assert result.ret == pytest.ExitCode.OK
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "SKIPPED"
-    outcomes = {
-        "test_behavior.py::test_skipped": "SKIPPED",
-        "test_behavior.py::test_excluded": "DESELECTED",
-    }
-    assert requirement["tests"] == [
-        {"nodeid": node_id, "outcome": outcomes[node_id]} for node_id in node_ids
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="SKIPPED", tests=expected_tests
+    )
 
 
 @pytest.mark.parametrize(
@@ -227,19 +227,19 @@ def test_deselection_prevents_verification_despite_a_passing_test(
 ):
     project = user_project(["REQ-001"], deselection_over_pass)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
+    expected_outcomes = {
+        "test_behavior.py::test_excluded": "DESELECTED",
+        "test_behavior.py::test_passed": "PASSED",
+    }
+    expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess("--req-json=report.json", *node_ids, "-k", "not excluded")
 
     assert result.ret == pytest.ExitCode.OK
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement["status"] == "DESELECTED"
-    outcomes = {
-        "test_behavior.py::test_excluded": "DESELECTED",
-        "test_behavior.py::test_passed": "PASSED",
-    }
-    assert requirement["tests"] == [
-        {"nodeid": node_id, "outcome": outcomes[node_id]} for node_id in node_ids
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="DESELECTED", tests=expected_tests
+    )
 
 
 def test_a_requirement_is_verified_when_both_associated_tests_pass(user_project, read_report):
@@ -249,13 +249,13 @@ def test_a_requirement_is_verified_when_both_associated_tests_pass(user_project,
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
-    assert report["requirements"]["REQ-001"] == {
-        "status": "PASSED",
-        "tests": [
-            {"nodeid": "test_behavior.py::test_first", "outcome": "PASSED"},
-            {"nodeid": "test_behavior.py::test_second", "outcome": "PASSED"},
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="PASSED",
+        tests=[
+            ("test_behavior.py::test_first", "PASSED"),
+            ("test_behavior.py::test_second", "PASSED"),
         ],
-    }
+    )
     assert report["summary"]["verified"] is True
 
 
@@ -275,11 +275,11 @@ def test_one_passing_test_does_not_verify_a_requirement_with_an_unverified_test(
 
     assert result.ret != pytest.ExitCode.OK
     report = read_report(project)
-    assert report["requirements"]["REQ-001"] == {
-        "status": status,
-        "tests": [
-            {"nodeid": "test_behavior.py::test_first", "outcome": "PASSED"},
-            {"nodeid": "test_behavior.py::test_second", "outcome": status},
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status=status,
+        tests=[
+            ("test_behavior.py::test_first", "PASSED"),
+            ("test_behavior.py::test_second", status),
         ],
-    }
+    )
     assert report["summary"]["verified"] is False

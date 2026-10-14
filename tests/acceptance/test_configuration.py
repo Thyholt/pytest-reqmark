@@ -2,6 +2,7 @@
 
 import pytest
 
+from tests.acceptance.expectations import expected
 from tests.acceptance.scenarios.configuration import (
     conflicting_inventories,
     duplicate_ini_ids,
@@ -19,11 +20,13 @@ def test_requirements_can_be_declared_in_pytest_ini(user_project, read_report):
     project = user_project(["REQ-001"], pytest_ini_inventory)
     (project.path / "pyproject.toml").unlink()
     project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n    REQ-001\n    REQ-002\n")
+
     result = project.runpytest_subprocess("--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
-    requirements = read_report(project)["requirements"]
-    assert requirements["REQ-001"]["status"] == "PASSED"
-    assert requirements["REQ-002"] == {"status": "MISSING", "tests": []}
+    report = read_report(project)
+    assert report["requirements"]["REQ-001"]["status"] == "PASSED"
+    assert expected(report["requirements"]["REQ-002"]).to_have(status="MISSING", tests=[])
 
 
 def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
@@ -31,14 +34,20 @@ def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
 ):
     project = user_project(["REQ-001"], pyproject_with_pytest_ini)
     project.makefile(".ini", pytest="[pytest]\naddopts = -q\n")
-    assert project.runpytest_subprocess("--req-strict", "--req-json=report.json").ret == 0
-    assert read_report(project)["requirements"]["REQ-001"]["status"] == "PASSED"
+
+    result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+
+    assert result.ret == 0
+    report = read_report(project)
+    assert report["requirements"]["REQ-001"]["status"] == "PASSED"
 
 
 def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project):
     project = user_project(["REQ-001"], conflicting_inventories)
     project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n    REQ-002\n")
+
     result = project.runpytest_subprocess("--req-report")
+
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
     assert "pyproject.toml" in message
@@ -60,15 +69,20 @@ def test_other_configuration_files_do_not_supply_a_requirement_inventory(
     project = user_project(["REQ-001"], unsupported_inventory)
     (project.path / "pyproject.toml").unlink()
     (project.path / filename).write_text(content, encoding="utf-8")
+
     result = project.runpytest_subprocess("--req-strict")
+
     assert result.ret != pytest.ExitCode.OK
-    assert "REQ-001" in result.stdout.str() + result.stderr.str()
+    message = result.stdout.str() + result.stderr.str()
+    assert "REQ-001" in message
 
 
 def test_normal_pytest_without_requirement_configuration_still_works(user_project):
     project = user_project([], without_requirement_configuration)
     (project.path / "pyproject.toml").unlink()
+
     result = project.runpytest_subprocess()
+
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1)
 
@@ -78,9 +92,12 @@ def test_no_requirement_configuration_means_success_with_zero_requirements(
 ):
     project = user_project([], zero_requirements_without_configuration)
     (project.path / "pyproject.toml").unlink()
+
     result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
-    assert read_report(project) == {
+    report = read_report(project)
+    assert report == {
         "requirements": {},
         "summary": {
             "requirements": 0,
@@ -97,7 +114,9 @@ def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(user_project):
     project = user_project(["REQ-001"], duplicate_ini_ids)
     (project.path / "pyproject.toml").unlink()
     project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n    REQ-001\n    REQ-001\n")
+
     result = project.runpytest_subprocess()
+
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
     assert "requirements" in message.lower()
@@ -142,7 +161,8 @@ def test_unsupported_inventory_files_are_ignored_when_tests_are_unmarked(
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1)
-    assert read_report(project) == {
+    report = read_report(project)
+    assert report == {
         "requirements": {},
         "summary": {
             "requirements": 0,

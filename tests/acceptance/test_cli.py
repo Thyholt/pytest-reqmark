@@ -22,7 +22,9 @@ from tests.acceptance.scenarios.cli.unmarked_outcomes import failed, skipped
 
 def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
     project = user_project(["REQ-001"], plain_pytest)
+
     result = project.runpytest_subprocess()
+
     result.assert_outcomes(passed=1)
     assert result.ret == pytest.ExitCode.OK
     assert "pytest-reqmark" not in result.stdout.str()
@@ -40,32 +42,42 @@ def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
 )
 def test_strict_mode_rejects_every_executed_unverified_outcome(user_project, scenario, status):
     project = user_project(["REQ-001"], scenario)
+
     result = project.runpytest_subprocess("--req-strict")
+
     assert result.ret != pytest.ExitCode.OK
-    assert "pytest-reqmark" in result.stdout.str()
-    assert status in result.stdout.str()
+    output = result.stdout.str()
+    assert "pytest-reqmark" in output
+    assert status in output
 
 
 def test_strict_mode_rejects_missing_requirements(user_project):
     project = user_project(["REQ-001"], missing_requirement)
+
     result = project.runpytest_subprocess("--req-strict")
+
     assert result.ret != pytest.ExitCode.OK
     assert "MISSING" in result.stdout.str()
 
 
 def test_strict_mode_rejects_deselected_requirement_tests(user_project):
     project = user_project(["REQ-001"], deselected_requirement)
+
     result = project.runpytest_subprocess("-k", "selected", "--req-strict")
+
     assert result.ret != pytest.ExitCode.OK
     assert "DESELECTED" in result.stdout.str()
 
 
 def test_strict_mode_succeeds_and_prints_a_report_when_every_requirement_passes(user_project):
     project = user_project(["REQ-001"], all_requirements_pass)
+
     result = project.runpytest_subprocess("--req-strict")
+
     assert result.ret == pytest.ExitCode.OK
-    assert "pytest-reqmark" in result.stdout.str()
-    assert "PASSED" in result.stdout.str()
+    output = result.stdout.str()
+    assert "pytest-reqmark" in output
+    assert "PASSED" in output
 
 
 @pytest.mark.parametrize(
@@ -79,7 +91,9 @@ def test_unmarked_outcomes_do_not_change_acceptance_verification(
     user_project, read_report, scenario, expected_exit
 ):
     project = user_project(["REQ-001"], scenario)
+
     result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
+
     report = read_report(project)
     assert report["requirements"]["REQ-001"]["status"] == "PASSED"
     assert report["summary"]["verified"] is True
@@ -88,16 +102,21 @@ def test_unmarked_outcomes_do_not_change_acceptance_verification(
 
 def test_acceptance_only_ci_ignores_failing_unmarked_tests(user_project, read_report):
     project = user_project(["REQ-001"], acceptance_only)
+
     result = project.runpytest_subprocess("-m", "req", "--req-strict", "--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
-    assert read_report(project)["summary"]["unverified"] == 0
+    report = read_report(project)
+    assert report["summary"]["unverified"] == 0
 
 
 def test_a_collection_error_prevents_a_successful_strict_verdict(user_project, read_report):
     project = user_project(["REQ-001"], collection_error)
+
     result = project.runpytest_subprocess(
         "--continue-on-collection-errors", "--req-strict", "--req-json=report.json"
     )
+
     assert result.ret != pytest.ExitCode.OK
     result.stdout.fnmatch_lines(["*pytest-reqmark*", "*Collection errors:*1*"])
     report = read_report(project)

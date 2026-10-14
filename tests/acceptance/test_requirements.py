@@ -2,6 +2,7 @@
 
 import pytest
 
+from tests.acceptance.expectations import expected
 from tests.acceptance.scenarios.requirements import (
     class_markers,
     invalid_deselected_marker,
@@ -30,59 +31,72 @@ from tests.acceptance.scenarios.requirements.opaque_ids import dotted, simple, u
 )
 def test_requirement_ids_are_opaque_strings(user_project, read_report, requirement, scenario):
     project = user_project([requirement], scenario)
+
     result = project.runpytest_subprocess("--req-json=report.json", "--strict-markers")
+
     assert result.ret == pytest.ExitCode.OK
-    assert read_report(project)["requirements"][requirement]["status"] == "PASSED"
+    report = read_report(project)
+    assert report["requirements"][requirement]["status"] == "PASSED"
 
 
 def test_one_test_can_verify_several_requirements(user_project, read_report):
     project = user_project(["REQ-001", "REQ-002"], multiple_requirements)
-    assert project.runpytest_subprocess("--req-json=report.json").ret == pytest.ExitCode.OK
-    requirements = read_report(project)["requirements"]
-    assert set(requirements) == {"REQ-001", "REQ-002"}
-    for requirement in requirements.values():
-        assert requirement["status"] == "PASSED"
-        assert requirement["tests"] == [
-            {"nodeid": "test_behavior.py::test_shared_behavior", "outcome": "PASSED"}
-        ]
+    expected_tests = [("test_behavior.py::test_shared_behavior", "PASSED")]
+
+    result = project.runpytest_subprocess("--req-json=report.json")
+
+    assert result.ret == pytest.ExitCode.OK
+    report = read_report(project)
+    assert set(report["requirements"]) == {"REQ-001", "REQ-002"}
+    for requirement in report["requirements"].values():
+        assert expected(requirement).to_have(status="PASSED", tests=expected_tests)
 
 
 def test_every_parameterized_case_is_an_individual_acceptance_test(user_project, read_report):
     project = user_project(["REQ-001"], parameterized_cases)
+    expected_tests = [
+        ("test_behavior.py::test_behavior[first]", "PASSED"),
+        ("test_behavior.py::test_behavior[second]", "PASSED"),
+    ]
+
     result = project.runpytest_subprocess("--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=2)
-    tests = read_report(project)["requirements"]["REQ-001"]["tests"]
-    assert tests == [
-        {"nodeid": "test_behavior.py::test_behavior[first]", "outcome": "PASSED"},
-        {"nodeid": "test_behavior.py::test_behavior[second]", "outcome": "PASSED"},
-    ]
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="PASSED", tests=expected_tests
+    )
 
 
 def test_requirement_markers_can_be_inherited_from_a_test_class(user_project, read_report):
     project = user_project(["REQ-001"], class_markers)
+
     result = project.runpytest_subprocess("--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=2)
-    requirement = read_report(project)["requirements"]["REQ-001"]
-    assert requirement == {
-        "status": "PASSED",
-        "tests": [
-            {"nodeid": "test_behavior.py::TestBehavior::test_first", "outcome": "PASSED"},
-            {"nodeid": "test_behavior.py::TestBehavior::test_second", "outcome": "PASSED"},
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="PASSED",
+        tests=[
+            ("test_behavior.py::TestBehavior::test_first", "PASSED"),
+            ("test_behavior.py::TestBehavior::test_second", "PASSED"),
         ],
-    }
+    )
 
 
 def test_repeating_a_marker_does_not_count_the_same_test_twice(user_project, read_report):
     project = user_project(["REQ-001"], repeated_marker)
+
     result = project.runpytest_subprocess("--req-json=report.json")
+
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1)
-    assert read_report(project)["requirements"]["REQ-001"] == {
-        "status": "PASSED",
-        "tests": [{"nodeid": "test_behavior.py::test_behavior", "outcome": "PASSED"}],
-    }
+    report = read_report(project)
+    assert expected(report["requirements"]["REQ-001"]).to_have(
+        status="PASSED", tests=[("test_behavior.py::test_behavior", "PASSED")]
+    )
 
 
 @pytest.mark.parametrize(
@@ -100,7 +114,9 @@ def test_invalid_requirement_markers_are_rejected_with_a_useful_message(
     user_project, scenario, diagnostic, reporting
 ):
     project = user_project(["REQ-001", "REQ-002"], scenario)
+
     result = project.runpytest_subprocess(*reporting)
+
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
     assert "unrecognized arguments" not in message.lower()
@@ -110,9 +126,12 @@ def test_invalid_requirement_markers_are_rejected_with_a_useful_message(
 
 def test_invalid_markers_are_rejected_even_when_the_test_is_deselected(user_project):
     project = user_project(["REQ-001"], invalid_deselected_marker)
+
     result = project.runpytest_subprocess("-k", "selected", "--req-report")
+
     assert result.ret != pytest.ExitCode.OK
-    assert "UNKNOWN" in result.stdout.str() + result.stderr.str()
+    message = result.stdout.str() + result.stderr.str()
+    assert "UNKNOWN" in message
 
 
 @pytest.mark.parametrize("inventory", ['"REQ-001"', "[123]", '["REQ-001", "REQ-001"]'])
@@ -121,7 +140,9 @@ def test_invalid_requirement_configuration_is_rejected(user_project, inventory):
     (project.path / "pyproject.toml").write_text(
         f"[tool.pytest-reqmark]\nrequirements = {inventory}\n", encoding="utf-8"
     )
+
     result = project.runpytest_subprocess("--req-report")
+
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
     assert "unrecognized arguments" not in message.lower()
