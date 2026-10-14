@@ -66,19 +66,6 @@ Fix reported problems before submitting. Check definitions live in
 [prek.toml](prek.toml), tool settings in [pyproject.toml](pyproject.toml), and
 CI jobs in [.github/workflows](.github/workflows).
 
-## Dependency security scans
-
-Create a [Snyk account](https://app.snyk.io/login), then add its authentication token as `SNYK_TOKEN`
-[GitHub Actions repository secret](https://github.com/Thyholt/pytest-tracereq/settings/secrets/actions).
-Do not put the token in source files or pull requests.
-
-The Snyk workflow scans runtime and development dependencies exported from
-`uv.lock` as standard pip requirements. This avoids requiring Snyk's Enterprise-only
-uv integration. The workflow fails when scanning cannot complete or vulnerabilities
-are found; its logs show vulnerability counts and severity, and its `snyk-results`
-artifact contains the JSON report. The README badge shows the latest `master`
-scan status and links to these results. Fork pull requests do not receive the token.
-
 ## Open a pull request
 
 Keep each pull request focused on one change. Explain the problem, what users
