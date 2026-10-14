@@ -205,11 +205,6 @@ are expected to fail until implementation. Never hide this with skips or xfails.
 - Keep `__init__.py` files completely empty: no docstrings, comments or code.
   The package-root `__init__.py` may only export public user-facing functions.
 - Do not merge, release or deploy as a side effect of preparing a reviewable change.
-
-### Session skills
-- Addy Osmani's skills are downloaded outside this repository at
-  `/workspace/session-skills/addyosmani-agent-skills/skills/`.
-- Read the relevant `SKILL.md` on demand when the session copy is available.
 - Apply TDD, CI, review and documentation workflows to the agreed task.
 - Codex only: no setup, symlinks or instruction files for other agents.
 - Do not restart the agreed workflow or request approval already given in the session.
@@ -222,11 +217,31 @@ are expected to fail until implementation. Never hide this with skips or xfails.
 
 When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
 
+- Whenever you use or mention a skill, include a clickable Markdown link to its
+  exact `SKILL.md` file, using an absolute local path so the user can open it in
+  their editor.
+- Keep AGENTS.md changes uncommitted until the user explicitly requests their
+  final consolidated commit; ordinary commit requests exclude this file.
+- Keep README scenario guidance focused on usage; document package initializer
+  and editor-navigation conventions in developer instructions.
+- Use domain-neutral requirement IDs and test names in specification examples.
+- Structure tests as Arrange, Act, Assert blocks separated by blank lines;
+  keep execution out of assertions and omit AAA comments.
 - A rejected acceptance input must produce a domain diagnostic; an unrecognized
   CLI option is not evidence that marker or inventory validation works.
 - Check aggregation in both test collection orders to catch first-result shortcuts.
-- Keep acceptance behavior visible in each test; do not import scenarios from
-  other test modules or generate test bodies through substitutions and fallbacks.
+- Keep acceptance expectations local and example behavior in named, lintable Python
+  scenario files; do not import scenarios from other test modules or generate
+  test bodies through substitutions and fallbacks. Exclude scenario files from
+  the outer pytest collection, and copy them into isolated user projects.
+  Keep requirement predicates boolean and assert in tests; pass expected test
+  identities and outcomes as tuples, hiding JSON field names inside the helper.
+  Reporting-format tests retain literal JSON expectations.
+  Inline requirement and summary lookups in assertions instead of introducing
+  aliases for report sections.
+- Refer to scenarios through package imports, not string paths; use their package
+  search paths when copying. Add empty `__init__.py` files only in referenced
+  scenario leaf folders to give editor navigation a concrete target.
 - Assert complete test identities and outcomes, not only counts or sets that
   can hide duplicated, omitted or unrelated report records.
 - Keep the product name `pytest-reqmark` consistent across packaging, configuration,
