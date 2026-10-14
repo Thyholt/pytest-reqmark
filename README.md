@@ -1,6 +1,6 @@
 # pytest-tracereq
 
-Stupid simple requirement marking and tracking for pytest.
+Requirement marking and tracing for pytest.
 
 ## Usage
 
@@ -61,18 +61,10 @@ pytest --tracereq-strict                # Report and fail on unverified requirem
 pytest -m tracereq --tracereq-strict    # Run only marked requirement tests
 ```
 
-For the example above, `pytest --tracereq-report` prints:
+The report is green when all requirements are verified and red when verification fails.
+The first report shows the example above; the second shows a requirement without tests.
 
-```text
-=================================== tracereq ===================================
-Requirement  Status      Tests
-REQ-001      PASSED      1
-REQ-002      PASSED      1
-Requirements: 2
-Passed: 2
-Unverified: 0
-Coverage: 100.0%
-```
+![Terminal reports showing verified requirements in green and a missing requirement in red.](https://raw.githubusercontent.com/Thyholt/pytest-tracereq/master/docs/images/terminal-reports.png)
 
 ### Read requirement statuses
 
@@ -115,9 +107,8 @@ Coverage is the percentage of declared requirements that are verified. With
 no declared requirements and no errors while finding tests, the acceptance
 check succeeds and coverage is 0.0%.
 
-The terminal report is red when acceptance verification fails. This includes
-errors while finding tests, even at 100% coverage. It follows pytest's color
-settings, so `--color=no` disables color.
+Errors while finding tests make verification fail, even at 100% coverage. The report follows
+pytest's color settings, so `--color=no` disables color.
 
 For a complete report, let pytest find the whole test suite. With `-k` or `-m`,
 the plugin still knows about the tests excluded by the filter and reports marked
