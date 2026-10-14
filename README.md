@@ -38,6 +38,12 @@ uv run pytest tests/acceptance --collect-only -q
 uv run pytest
 ```
 
+Tests run in parallel with [pytest-xdist](https://pytest-xdist.readthedocs.io/en/stable/distribution.html),
+using `-n auto` to select the worker count from the available CPUs.
+Use `uv run pytest -n 0` for serial execution or `uv run pytest -n 4` to choose
+the worker count explicitly. Only the outer suite runs in parallel; each
+acceptance scenario still runs in its own isolated pytest project.
+
 The `check` workflow runs lint, formatting, types, collection and tests independently,
 so a failure in one check cannot hide the others. The `integration` workflow builds a wheel,
 installs it into a fresh environment and runs the acceptance suite outside the

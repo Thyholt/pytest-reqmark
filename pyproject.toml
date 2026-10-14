@@ -15,14 +15,18 @@ license = "MIT"
 reqmark = "pytest_reqmark.plugin"
 
 [dependency-groups]
-dev = ["ruff>=0.12", "ty>=0.0.1a16"]
+dev = [
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.12",
+    "ty>=0.0.1a16",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pytest_reqmark"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -n auto"
 
 [tool.ruff]
 target-version = "py310"
