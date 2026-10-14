@@ -50,6 +50,8 @@ coverage.xml
 *.lcov
 .hypothesis/
 .pytest_cache/
+/examples/*/report.json
+!/examples/quickstart/report.json
 cover/
 
 # Translations
@@ -207,6 +209,7 @@ tempCodeRunnerFile.py
 
 # Ruff stuff:
 .ruff_cache/
+.rumdl_cache/
 
 # PyPI configuration file
 .pypirc

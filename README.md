@@ -1,20 +1,22 @@
 # pytest-reqmark
 
-Stupid-simple requirement marking and tracking for pytest.
+Stupid simple requirement marking and tracking for pytest.
 
 ## Usage
 
 Install `pytest-reqmark` into your pytest environment. The plugin is discovered
-automatically; Python 3.10+ and pytest 8+ are supported.
+automatically. Python 3.10+ and pytest 8+ are supported.
 
-Declare requirement IDs in `pyproject.toml`:
+### Declare requirements
+
+Declare requirement IDs in `pyproject.toml`.
 
 ```toml
 [tool.pytest-reqmark]
 requirements = ["REQ-001", "REQ-002"]
 ```
 
-Alternatively, use one ID per line in `pytest.ini`:
+Alternatively, use one ID per line in `pytest.ini`.
 
 ```ini
 [pytest]
@@ -23,11 +25,14 @@ req_requirements =
     REQ-002
 ```
 
-Declaring inventories in both files is an error. Other files do not supply
-inventories. IDs are opaque strings; duplicates and undeclared marked IDs are
-rejected. No inventory, or an empty inventory, means zero requirements.
+Declare requirements in one of these files. Using both is an error, and other
+files do not supply requirements. IDs are opaque strings. Duplicates and marked
+IDs that have not been declared are rejected. No inventory, or an empty inventory,
+means zero requirements.
 
-Associate existing tests using one marker per requirement:
+### Mark tests
+
+Associate tests with requirements, using one marker per requirement.
 
 ```python
 import pytest
@@ -39,45 +44,115 @@ def test_shared_behavior():
     assert 1 + 1 == 2
 ```
 
+### Run pytest
+
+Plain `pytest` checks requirement configuration and markers without printing
+a requirement report. Add `--req-report` to see the report, or `--req-strict`
+to also fail the run when a requirement is unverified.
+
 ```sh
 pytest --req-report                    # Print the acceptance report
 pytest --req-json=report.json          # Export statuses and individual test outcomes
 pytest --req-strict                    # Report and fail on unverified requirements
-pytest -m req --req-strict             # Acceptance-only CI gate
+pytest -m req --req-strict             # Run only marked requirement tests
 ```
 
-A requirement is verified only when every associated test passes. Outcomes
-aggregate in this order: `ERROR > FAILED > XPASSED > XFAILED > SKIPPED > DESELECTED
-> PASSED`. Requirements without collected tests are `MISSING`. Collected tests
-that never execute, including collect-only or early-stop runs, are `SKIPPED`.
-Collection errors prevent a successful acceptance verdict.
+### Read requirement statuses
 
-Unmarked test outcomes do not affect acceptance verification; pytest retains its
-ordinary exit behavior. With zero requirements and no collection errors the
-acceptance verdict is successful and coverage is 0.0%. Plain `pytest` validates
-inventories and markers without printing an acceptance report. Full collection
-is required for authoritative coverage; `-k` and `-m` retain deselected identities,
-while tests outside the collected paths cannot be identified.
+A requirement is verified when every test marked with its ID passes. One passing
+test is not enough if another test for the same requirement fails or skips.
 
-Read [the acceptance contract](docs/acceptance-contract.md) for the configuration
-and JSON format. Tests in
-[`tests/acceptance`](tests/acceptance) exercise real pytest commands against
-isolated user projects. Each test name states the behavior being accepted.
+When those tests have different results, the report uses the first matching
+status in this table, reading from top to bottom.
 
-The example projects live in [`tests/acceptance/scenarios`](tests/acceptance/scenarios)
-as ordinary Python files. Each acceptance test imports the scenario's
-package and passes it to `user_project`; ty can check the reference without
-running pytest. The harness copies the scenario directory into pytester's temporary
-project and writes the requirement inventory. Scenario folders can include `test_behavior.py`,
-additional test modules and their own `conftest.py` fixtures. Keep imports
-explicit in each file. Ruff and ty check these files alongside the test harness.
-They are excluded from the outer pytest collection because some examples
-deliberately fail, skip, or raise collection errors. Configuration inputs and
-assertions about plugin results remain in the acceptance tests.
+| Status | Meaning |
+| --- | --- |
+| `ERROR` | A test's setup or cleanup failed. |
+| `FAILED` | A test failed. |
+| `XPASSED` | A test marked as an expected failure passed instead. |
+| `XFAILED` | A test failed as expected. |
+| `SKIPPED` | A test was skipped or never ran. |
+| `DESELECTED` | A test was excluded by a filter such as `-k` or `-m`. |
+| `PASSED` | Every test for the requirement passed. |
+
+For example, if one test passes and another skips, the requirement is `SKIPPED`
+and remains unverified. If one test fails and another skips, it is `FAILED`.
+
+### Missing and unfinished tests
+
+Pytest first finds tests, then runs them. If it finds no marked tests for a
+declared requirement, that requirement is `MISSING`. Tests that were found but
+never ran are `SKIPPED`, including runs that only find tests or stop early.
+If pytest encounters an error while finding tests, such as a broken import,
+the acceptance check cannot succeed.
+
+### Tests without markers
+
+Tests without a requirement marker do not change requirement statuses. They
+can still make pytest fail. In [the duck example](examples/acceptance_only),
+the requirement passes, but the unmarked cheese test fails the pytest run.
+
+### Check coverage
+
+Coverage is the percentage of declared requirements that are verified. With
+no declared requirements and no errors while finding tests, the acceptance
+check succeeds and coverage is 0.0%.
+
+For a complete report, let pytest find the whole test suite. With `-k` or `-m`,
+the plugin still knows about the tests excluded by the filter and reports marked
+ones as `DESELECTED`. If you run only one folder, it cannot see tests in other
+folders.
+
+## Runnable examples
+
+Start with [the pizza](examples/quickstart/test_behavior.py), then try the other
+examples to see what makes a requirement pass or remain unverified.
+
+Run the commands below from the repository root. Dependencies are installed automatically.
+
+| Example | With `--req-strict` | Exit code |
+| --- | --- | --- |
+| [Quickstart](examples/quickstart) - Two slices of pizza | `PASSED`, 100% coverage | 0 |
+| [Missing requirement](examples/missing_requirement) - A lost sock | `MISSING`, 50% coverage | 1 |
+| [Partial verification](examples/partial_verification) - Cat skips a meeting | `SKIPPED`, 0% coverage | 1 |
+| [Acceptance only](examples/acceptance_only) - Duck versus cheese | `PASSED` with `-m req` | 0 |
+
+### Run an example
+
+Run the `Quickstart` example, then replace `quickstart` with another example folder.
+
+```sh
+uv run --locked pytest examples/quickstart --req-strict
+```
+
+For `acceptance_only`, add `-m req` to run only the marked test.
+Without that filter, the unmarked test makes pytest fail.
+
+### Inspect the JSON report
+
+Export the example results to see the requirement status and individual test outcomes.
+
+```sh
+uv run --locked pytest examples/quickstart --req-json=examples/quickstart/report.json
+```
+
+Open [examples/quickstart/report.json](examples/quickstart/report.json) after running the command.
+
+### Verify all examples
+
+Check that every example behaves as described.
+
+```sh
+uv run --locked pytest examples/test_examples.py -n 0
+```
+
+All five checks should pass, including checks for the examples that deliberately
+fail. The examples are also verified in CI.
 
 ## Development
 
-Python 3.10 or newer, managed with uv:
+Development uses Python 3.10 or newer, managed with uv. Run these commands from
+the repository root.
 
 ```sh
 uv sync --locked
@@ -85,32 +160,39 @@ uv run prek install
 uv run prek run --all-files
 uv run ruff check .
 uv run ruff format --check .
+uv run rumdl check .
 uv run ty check
-uv run pytest tests/acceptance --collect-only -q
+uv run pytest --collect-only -q
 uv run pytest
 ```
 
-[prek](https://prek.j178.dev/ci/) runs the same checks before commits and in CI:
-YAML and TOML syntax, merge conflicts, private keys, whitespace, Ruff lint and
-formatting, and ty types. The hooks are configured in [`prek.toml`](prek.toml)
-and use the dependency versions in `uv.lock`.
-They report problems without modifying files; run `uv run ruff check --fix .`
-or `uv run ruff format .` when needed, then stage the fixes and commit again.
+[prek](https://prek.j178.dev/ci/) checks YAML and TOML syntax, merge conflicts,
+private keys, whitespace, Python and Markdown lint, formatting and types before
+commits and in CI.
+The hooks are configured in [`prek.toml`](prek.toml) and use the dependency
+versions in `uv.lock`. They report problems without modifying files. Apply fixes
+with `uv run ruff check --fix .` or `uv run ruff format .` as needed, then stage
+the fixes and commit again.
 
-Tests run in parallel with [pytest-xdist](https://pytest-xdist.readthedocs.io/en/stable/distribution.html),
-using `-n auto` to select the worker count from the available CPUs.
+Markdown is checked with [rumdl](https://github.com/rvben/rumdl). The
+[VS Code extension](https://marketplace.visualstudio.com/items?itemName=rvben.rumdl)
+detects the binary in `.venv` and reads the rules from `pyproject.toml`, so the
+editor uses the same version and configuration as CI.
+
+Tests run in parallel with [pytest-xdist](https://pytest-xdist.readthedocs.io/en/stable/distribution.html).
+The default `-n auto` selects the worker count from the available CPUs.
 Use `uv run pytest -n 0` for serial execution or `uv run pytest -n 4` to choose
-the worker count explicitly. Only the outer suite runs in parallel; each
-acceptance scenario still runs in its own isolated pytest project.
+the worker count explicitly. Only the outer suite runs in parallel. Each
+acceptance scenario and public example runs in its own isolated pytest project.
 
 The `check` workflow runs prek, collection and tests as independent jobs.
-Prek runs every hook even if another hook fails. The `integration` workflow builds a wheel,
-installs it into a fresh environment and runs the acceptance suite outside the
-source tree on Python 3.10 with pytest 8 and Python 3.13 with current pytest.
+Prek runs every hook even if another hook fails. The `integration` workflow
+builds a wheel, installs it into a fresh environment and verifies acceptance
+and public examples on Python 3.10 with pytest 8 and Python 3.13 with current pytest.
 It verifies automatic plugin discovery through the `pytest11` entry point.
 Both workflows run on pull requests and pushes to `master`, avoiding duplicate
-push and pull-request runs for feature branches.
+push and pull request runs for feature branches.
 
 Dependency versions are recorded in `uv.lock`, generated by uv in CI.
-The check workflow uses `--locked` to reject stale
-dependency resolution rather than silently update it.
+The check workflow uses `--locked` to reject dependency changes that have not
+been recorded in the lockfile.

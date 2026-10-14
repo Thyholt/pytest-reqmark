@@ -1,0 +1,21 @@
+{
+  "requirements": {
+    "REQ-001": {
+      "status": "PASSED",
+      "tests": [
+        {
+          "nodeid": "test_behavior.py::test_pizza_has_two_slices",
+          "outcome": "PASSED"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "requirements": 1,
+    "passed": 1,
+    "unverified": 0,
+    "coverage": 100.0,
+    "verified": true,
+    "collection_errors": 0
+  }
+}
