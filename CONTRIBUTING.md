@@ -49,6 +49,19 @@ Run the full test suite:
 uv run --locked pytest
 ```
 
+Measure line and branch coverage, including the acceptance scenarios' pytest subprocesses:
+
+```sh
+uv run --locked pytest --cov --cov-report=term-missing --cov-report=xml
+```
+
+Coverage settings live in `pyproject.toml`. The subprocess patch collects execution
+inside the isolated user projects; pytest-cov combines their results with the main
+suite and xdist workers. The terminal shows missing lines and branches, and
+`coverage.xml` contains the machine-readable report uploaded to Codecov by CI.
+This measures the plugin's code, independently of the requirement verification
+coverage shown in its reports. No minimum percentage is enforced initially.
+
 Fix reported problems before submitting. Check definitions live in
 [prek.toml](prek.toml), tool settings in [pyproject.toml](pyproject.toml), and
 CI jobs in [.github/workflows](.github/workflows).
