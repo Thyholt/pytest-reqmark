@@ -53,7 +53,7 @@ containing Unicode, spaces or punctuation.
 | --- | --- |
 | `test_configuration.py` | Only the two supported files supply requirement inventories; conflicts are explained. |
 | `test_requirements.py` | Arbitrary IDs, several requirements per test, parameterized cases, inherited markers, no double counting, invalid marker and configuration rejection. |
-| `test_statuses.py` | Execution statuses, setup/teardown errors, fixture skips, strict and non-strict XPASS, and aggregation precedence. |
+| `test_statuses.py` | Execution statuses, setup/teardown errors and XFAILs, fixture skips, strict and non-strict XPASS, assertion text containing XPASS, and aggregation precedence. |
 | `test_selection.py` | Deselected tests retain their identities; missing or uncollected tests are MISSING. |
 | `test_cli.py` | Normal pytest, strict enforcement, acceptance-only selection, unmarked outcomes, and collection errors. |
 | `test_reporting.py` | Terminal status/counts, JSON node IDs/outcomes, and coverage based on requirements. |
@@ -94,6 +94,12 @@ final outcome per node ID.
 Collected tests that never execute are reported as `SKIPPED`, including tests
 left after an early stop and tests collected with `--collect-only`. They retain
 their node IDs and keep associated requirements unverified.
+A requirement shared by a passed test and an unexecuted test is `SKIPPED`,
+including when an unmarked failure stops execution before the remaining test.
+
+Expected failures raised by fixtures during setup or teardown are `XFAILED` and
+remain unverified in strict mode. Assertion text containing `[XPASS(strict)]`
+does not turn an ordinary test failure into an unexpected pass.
 
 `summary.verified` is the acceptance verdict, independently of pytest's exit
 status. It is true only when all declared requirements are PASSED and there

@@ -21,21 +21,6 @@ def test_fixture_failures_are_errors_even_with_xpass_text(when):
     assert outcome == "ERROR"
 
 
-@pytest.mark.parametrize("when", ["setup", "call", "teardown"])
-def test_expected_failures_in_any_execution_phase_are_xfailed(when):
-    outcome = phase_outcome(when, "skipped", wasxfail=True)
-
-    assert outcome == "XFAILED"
-
-
-def test_an_assertion_mentioning_xpass_is_still_a_failure():
-    diagnostic = "AssertionError: the text [XPASS(strict)] is not an unexpected pass"
-
-    outcome = phase_outcome("call", "failed", longrepr=diagnostic)
-
-    assert outcome == "FAILED"
-
-
 def test_a_strict_unexpected_pass_has_the_same_outcome_as_a_non_strict_one():
     diagnostic = "[XPASS(strict)] known issue"
 
