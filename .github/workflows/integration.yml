@@ -3,6 +3,7 @@ name: integration
 on:
   push:
     branches: [master]
+
   pull_request:
 
 permissions:
@@ -11,24 +12,33 @@ permissions:
 jobs:
   installed-package:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         include:
           - python: "3.10"
             pytest: "pytest>=8,<9"
+
           - python: "3.13"
             pytest: "pytest>=8"
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: astral-sh/setup-uv@v6
+
       - run: uv python install '${{ matrix.python }}'
+
       - run: uv build --python '${{ matrix.python }}'
+
       - run: uv venv /tmp/acceptance-integration --python '${{ matrix.python }}'
+
       - name: Install the wheel into an isolated environment
         run: >-
           uv pip install --python /tmp/acceptance-integration/bin/python
           dist/*.whl '${{ matrix.pytest }}' 'pytest-xdist>=3.8.0'
+
       - name: Verify installed distribution and plugin identity
         working-directory: /tmp
         run: |
@@ -46,6 +56,7 @@ jobs:
           entry_points[0].load()
           print(f"Installed {package.metadata['Name']} {package.version}: {pytest_reqmark.__file__}")
           PY
+
       - name: Run acceptance scenarios against the installed wheel outside the source tree
         working-directory: /tmp
         run: >-

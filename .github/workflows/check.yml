@@ -3,6 +3,7 @@ name: check
 on:
   push:
     branches: [master]
+
   pull_request:
 
 permissions:
@@ -12,22 +13,31 @@ jobs:
   check:
     runs-on: ubuntu-latest
     name: ${{ matrix.name }}
+
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: lint
             command: ruff check .
+
           - name: format
             command: ruff format --check --diff .
+
           - name: types
             command: ty check
+
           - name: collection
             command: pytest tests/acceptance --collect-only -q
+
           - name: tests
             command: pytest --tb=short -q
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: astral-sh/setup-uv@v6
+
       - run: uv sync --locked --python 3.10
+
       - run: uv run --locked ${{ matrix.command }}
