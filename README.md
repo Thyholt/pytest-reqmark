@@ -14,6 +14,17 @@ configuration, JSON format and decisions requiring review. Tests in
 [`tests/acceptance`](tests/acceptance) exercise real pytest commands against
 isolated user projects. Each test name states the behavior being accepted.
 
+The example projects live in [`tests/acceptance/scenarios`](tests/acceptance/scenarios)
+as ordinary Python files. Each acceptance test imports the scenario's
+package and passes it to `user_project`; ty can check the reference without
+running pytest. The harness copies the scenario directory into pytester's temporary
+project and writes the requirement inventory. Scenario folders can include `test_behavior.py`,
+additional test modules and their own `conftest.py` fixtures. Keep imports
+explicit in each file. Ruff and ty check these files alongside the test harness.
+They are excluded from the outer pytest collection because some examples
+deliberately fail, skip, or raise collection errors. Configuration inputs and
+assertions about plugin results remain in the acceptance tests.
+
 ## Development
 
 Python 3.10 or newer, managed with uv:

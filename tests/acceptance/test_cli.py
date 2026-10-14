@@ -2,9 +2,26 @@
 
 import pytest
 
+from tests.acceptance.scenarios.cli import (
+    acceptance_only,
+    all_requirements_pass,
+    collection_error,
+    deselected_requirement,
+    missing_requirement,
+    plain_pytest,
+)
+from tests.acceptance.scenarios.cli.strict_unverified_outcome import (
+    expected_failure,
+    failed_test,
+    setup_error,
+    skipped_test,
+    unexpected_pass,
+)
+from tests.acceptance.scenarios.cli.unmarked_outcomes import failed, skipped
+
 
 def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
-    project = user_project(["REQ-001"], "def test_unmarked():\n    pass\n")
+    project = user_project(["REQ-001"], plain_pytest)
     result = project.runpytest_subprocess()
     result.assert_outcomes(passed=1)
     assert result.ret == pytest.ExitCode.OK
@@ -12,70 +29,17 @@ def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
 
 
 @pytest.mark.parametrize(
-    ("tests", "fixtures", "status"),
+    ("scenario", "status"),
     [
-        pytest.param(
-            """
-@pytest.mark.req("REQ-001")
-def test_behavior():
-    pytest.skip("not available")
-""",
-            "",
-            "SKIPPED",
-            id="skipped-test",
-        ),
-        pytest.param(
-            """
-@pytest.mark.req("REQ-001")
-@pytest.mark.xfail(reason="known issue")
-def test_behavior():
-    assert False
-""",
-            "",
-            "XFAILED",
-            id="expected-failure",
-        ),
-        pytest.param(
-            """
-@pytest.mark.req("REQ-001")
-@pytest.mark.xfail(reason="known issue")
-def test_behavior():
-    pass
-""",
-            "",
-            "XPASSED",
-            id="unexpected-pass",
-        ),
-        pytest.param(
-            """
-@pytest.mark.req("REQ-001")
-def test_behavior():
-    assert False
-""",
-            "",
-            "FAILED",
-            id="failed-test",
-        ),
-        pytest.param(
-            """
-@pytest.mark.req("REQ-001")
-def test_behavior(broken):
-    pass
-""",
-            """
-@pytest.fixture
-def broken():
-    raise RuntimeError("setup failed")
-""",
-            "ERROR",
-            id="setup-error",
-        ),
+        pytest.param(skipped_test, "SKIPPED", id="skipped-test"),
+        pytest.param(expected_failure, "XFAILED", id="expected-failure"),
+        pytest.param(unexpected_pass, "XPASSED", id="unexpected-pass"),
+        pytest.param(failed_test, "FAILED", id="failed-test"),
+        pytest.param(setup_error, "ERROR", id="setup-error"),
     ],
 )
-def test_strict_mode_rejects_every_executed_unverified_outcome(
-    user_project, tests, fixtures, status
-):
-    project = user_project(["REQ-001"], tests, fixtures=fixtures)
+def test_strict_mode_rejects_every_executed_unverified_outcome(user_project, scenario, status):
+    project = user_project(["REQ-001"], scenario)
     result = project.runpytest_subprocess("--req-strict")
     assert result.ret != pytest.ExitCode.OK
     assert "pytest-reqmark" in result.stdout.str()
@@ -83,66 +47,54 @@ def test_strict_mode_rejects_every_executed_unverified_outcome(
 
 
 def test_strict_mode_rejects_missing_requirements(user_project):
-    project = user_project(["REQ-001"], "def test_unmarked():\n    pass\n")
+    project = user_project(["REQ-001"], missing_requirement)
     result = project.runpytest_subprocess("--req-strict")
     assert result.ret != pytest.ExitCode.OK
     assert "MISSING" in result.stdout.str()
 
 
 def test_strict_mode_rejects_deselected_requirement_tests(user_project):
-    project = user_project(
-        ["REQ-001"],
-        '@pytest.mark.req("REQ-001")\ndef test_marked():\n    pass\n'
-        "\ndef test_selected():\n    pass\n",
-    )
+    project = user_project(["REQ-001"], deselected_requirement)
     result = project.runpytest_subprocess("-k", "selected", "--req-strict")
     assert result.ret != pytest.ExitCode.OK
     assert "DESELECTED" in result.stdout.str()
 
 
 def test_strict_mode_succeeds_and_prints_a_report_when_every_requirement_passes(user_project):
-    project = user_project(
-        ["REQ-001"], '@pytest.mark.req("REQ-001")\ndef test_behavior():\n    pass\n'
-    )
+    project = user_project(["REQ-001"], all_requirements_pass)
     result = project.runpytest_subprocess("--req-strict")
     assert result.ret == pytest.ExitCode.OK
     assert "pytest-reqmark" in result.stdout.str()
     assert "PASSED" in result.stdout.str()
 
 
-@pytest.mark.parametrize("unmarked", ["assert False", 'pytest.skip("optional")'])
+@pytest.mark.parametrize(
+    ("scenario", "expected_exit"),
+    [
+        pytest.param(failed, pytest.ExitCode.TESTS_FAILED, id="assert False"),
+        pytest.param(skipped, pytest.ExitCode.OK, id='pytest.skip("optional")'),
+    ],
+)
 def test_unmarked_outcomes_do_not_change_acceptance_verification(
-    user_project, read_report, unmarked
+    user_project, read_report, scenario, expected_exit
 ):
-    project = user_project(
-        ["REQ-001"],
-        '@pytest.mark.req("REQ-001")\ndef test_marked():\n    pass\n'
-        f"\ndef test_unmarked():\n    {unmarked}\n",
-    )
+    project = user_project(["REQ-001"], scenario)
     result = project.runpytest_subprocess("--req-strict", "--req-json=report.json")
     report = read_report(project)
     assert report["requirements"]["REQ-001"]["status"] == "PASSED"
     assert report["summary"]["verified"] is True
-    expected = pytest.ExitCode.TESTS_FAILED if unmarked == "assert False" else pytest.ExitCode.OK
-    assert result.ret == expected
+    assert result.ret == expected_exit
 
 
 def test_acceptance_only_ci_ignores_failing_unmarked_tests(user_project, read_report):
-    project = user_project(
-        ["REQ-001"],
-        '@pytest.mark.req("REQ-001")\ndef test_marked():\n    pass\n'
-        "\ndef test_unmarked():\n    assert False\n",
-    )
+    project = user_project(["REQ-001"], acceptance_only)
     result = project.runpytest_subprocess("-m", "req", "--req-strict", "--req-json=report.json")
     assert result.ret == pytest.ExitCode.OK
     assert read_report(project)["summary"]["unverified"] == 0
 
 
 def test_a_collection_error_prevents_a_successful_strict_verdict(user_project, read_report):
-    project = user_project(
-        ["REQ-001"], '@pytest.mark.req("REQ-001")\ndef test_behavior():\n    pass\n'
-    )
-    project.makepyfile(test_broken="raise RuntimeError('collection failed')")
+    project = user_project(["REQ-001"], collection_error)
     result = project.runpytest_subprocess(
         "--continue-on-collection-errors", "--req-strict", "--req-json=report.json"
     )

@@ -2,24 +2,13 @@
 
 import pytest
 
-REPORT_SCENARIO = """
-@pytest.mark.req("training.yolo.config")
-def test_parameters_logged():
-    pass
-
-@pytest.mark.req("training.yolo.config")
-def test_source_logged():
-    pass
-
-@pytest.mark.req("dataset.versioning")
-def test_version_stable():
-    pytest.skip("not ready")
-"""
+from tests.acceptance.scenarios.reporting import empty_inventory, summary
 
 
 def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(user_project):
     project = user_project(
-        ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"], REPORT_SCENARIO
+        ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"],
+        summary,
     )
     result = project.runpytest_subprocess("--req-report")
     assert result.ret == pytest.ExitCode.OK
@@ -41,7 +30,8 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
     user_project, read_report
 ):
     project = user_project(
-        ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"], REPORT_SCENARIO
+        ["training.yolo.config", "training.rfdetr.config", "dataset.versioning"],
+        summary,
     )
     assert project.runpytest_subprocess("--req-json=report.json").ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -73,7 +63,7 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
 def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
     user_project, read_report, config_file
 ):
-    project = user_project([], "def test_unmarked():\n    pass\n")
+    project = user_project([], empty_inventory)
     if config_file == "pytest.ini":
         (project.path / "pyproject.toml").unlink()
         project.makefile(".ini", pytest="[pytest]\nreq_requirements =\n")

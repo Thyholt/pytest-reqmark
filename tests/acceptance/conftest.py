@@ -3,19 +3,27 @@
 import json
 from collections.abc import Callable
 from pathlib import Path
+from shutil import copytree, ignore_patterns
+from types import ModuleType
 
 import pytest
+
+collect_ignore = ["scenarios"]
 
 
 @pytest.fixture
 def user_project(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
-) -> Callable[..., pytest.Pytester]:
+) -> Callable[[list[str], ModuleType], pytest.Pytester]:
     monkeypatch.delenv("PYTEST_DISABLE_PLUGIN_AUTOLOAD", raising=False)
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
     monkeypatch.delenv("PYTEST_PLUGINS", raising=False)
 
-    def create(requirements: list[str], tests: str, *, fixtures: str = "") -> pytest.Pytester:
+    def create(requirements: list[str], scenario: ModuleType) -> pytest.Pytester:
+        (scenario_path,) = scenario.__path__
+        copytree(
+            scenario_path, pytester.path, dirs_exist_ok=True, ignore=ignore_patterns("__pycache__")
+        )
         pytester.makefile(
             ".toml",
             pyproject=(
@@ -23,9 +31,6 @@ def user_project(
                 f"requirements = {json.dumps(requirements, ensure_ascii=False)}\n"
             ),
         )
-        pytester.makepyfile(test_behavior="import pytest\n" + tests)
-        if fixtures:
-            pytester.makeconftest("import pytest\n" + fixtures)
         return pytester
 
     return create

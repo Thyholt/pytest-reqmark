@@ -111,7 +111,14 @@ format and when configuration is absent. Unsupported inventory files are ignored
 for unmarked projects, yielding successful zero-requirement verification.
 Association tests assert complete node-ID/outcome records, including ordering
 and duplicate detection. Each outcome and precedence scenario keeps its source
-visible locally, with no imports from other test modules or source substitutions.
+in a named Python project under `tests/acceptance/scenarios`, with no imports from
+other test modules or source substitutions. These files are linted and formatted;
+acceptance tests refer to scenarios through package imports, which ty checks
+without executing their test modules. Scenario leaf folders have empty
+`__init__.py` files for editor navigation; parent folders remain namespace packages.
+The harness copies each package directory into an isolated pytest project.
+The outer test collection excludes the scenario directory, so deliberately
+failing examples run only inside their acceptance scenarios.
 
 ## Review and next step
 
