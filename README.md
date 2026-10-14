@@ -4,6 +4,7 @@
 [![Python versions][python-versions-badge]][pypi]
 [![Tests][tests-badge]][tests]
 [![Code coverage][codecov-badge]][codecov]
+[![Snyk security][snyk-badge]][snyk]
 
 **Know which requirements your tests actually verify.**
 
@@ -189,3 +190,6 @@ See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
 
 [codecov]: https://app.codecov.io/gh/Thyholt/pytest-tracereq
 [codecov-badge]: https://codecov.io/gh/Thyholt/pytest-tracereq/branch/master/graph/badge.svg
+
+[snyk]: https://snyk.io/test/github/Thyholt/pytest-tracereq
+[snyk-badge]: https://snyk.io/test/github/Thyholt/pytest-tracereq/badge.svg
