@@ -1,4 +1,4 @@
-[tool.pytest-reqmark]
+[tool.tracereq]
 requirements = ["REQ-001"]
 
 [tool.pytest.ini_options]

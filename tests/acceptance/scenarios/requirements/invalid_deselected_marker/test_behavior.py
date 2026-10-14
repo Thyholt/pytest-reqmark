@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.req("UNKNOWN")
+@pytest.mark.tracereq("UNKNOWN")
 def test_invalid():
     pass
 

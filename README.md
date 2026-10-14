@@ -1,18 +1,37 @@
-# pytest-reqmark
+# tracereq
 
 Stupid simple requirement marking and tracking for pytest.
 
 ## Usage
 
-Install `pytest-reqmark` into your pytest environment. The plugin is discovered
+Install `pytest-tracereq` into your pytest environment. The plugin is discovered
 automatically. Python 3.10+ and pytest 8+ are supported.
+
+```sh
+pip install pytest-tracereq
+```
+
+### Migrating from pytest-reqmark
+
+Uninstall `pytest-reqmark` before installing `pytest-tracereq`; both plugins must
+not be installed together. Replace Python imports of `pytest_reqmark` with `tracereq`.
+Update existing projects as follows; the old names are no longer supported.
+
+| Previous name | New name |
+| --- | --- |
+| `pytest.mark.req(...)` | `pytest.mark.tracereq(...)` |
+| `pytest -m req` | `pytest -m tracereq` |
+| `--req-report`, `--req-strict`, `--req-json` | `--tracereq-report`, `--tracereq-strict`, `--tracereq-json` |
+| `[tool.pytest-reqmark]` | `[tool.tracereq]` |
+| `req_requirements` in `pytest.ini` | `tracereq_requirements` |
+| `-p reqmark` / `-p no:reqmark` | `-p tracereq` / `-p no:tracereq` |
 
 ### Declare requirements
 
 Declare requirement IDs in `pyproject.toml`.
 
 ```toml
-[tool.pytest-reqmark]
+[tool.tracereq]
 requirements = ["REQ-001", "REQ-002"]
 ```
 
@@ -20,7 +39,7 @@ Alternatively, use one ID per line in `pytest.ini`.
 
 ```ini
 [pytest]
-req_requirements =
+tracereq_requirements =
     REQ-001
     REQ-002
 ```
@@ -38,8 +57,8 @@ Associate tests with requirements, using one marker per requirement.
 import pytest
 
 
-@pytest.mark.req("REQ-001")
-@pytest.mark.req("REQ-002")
+@pytest.mark.tracereq("REQ-001")
+@pytest.mark.tracereq("REQ-002")
 def test_shared_behavior():
     assert 1 + 1 == 2
 ```
@@ -47,14 +66,14 @@ def test_shared_behavior():
 ### Run pytest
 
 Plain `pytest` checks requirement configuration and markers without printing
-a requirement report. Add `--req-report` to see the report, or `--req-strict`
+a requirement report. Add `--tracereq-report` to see the report, or `--tracereq-strict`
 to also fail the run when a requirement is unverified.
 
 ```sh
-pytest --req-report                    # Print the acceptance report
-pytest --req-json=report.json          # Export statuses and individual test outcomes
-pytest --req-strict                    # Report and fail on unverified requirements
-pytest -m req --req-strict             # Run only marked requirement tests
+pytest --tracereq-report                # Print the acceptance report
+pytest --tracereq-json=report.json       # Export statuses and individual test outcomes
+pytest --tracereq-strict                # Report and fail on unverified requirements
+pytest -m tracereq --tracereq-strict    # Run only marked requirement tests
 ```
 
 ### Read requirement statuses
@@ -114,22 +133,22 @@ examples to see what makes a requirement pass or remain unverified.
 
 Run the commands below from the repository root. Dependencies are installed automatically.
 
-| Example | With `--req-strict` | Exit code |
+| Example | With `--tracereq-strict` | Exit code |
 | --- | --- | --- |
 | [Quickstart][quickstart] - Two slices of pizza | `PASSED`, 100% coverage | 0 |
 | [Missing requirement][missing-requirement] - A lost sock | `MISSING`, 50% coverage | 1 |
 | [Partial verification][partial-verification] - Cat skips a meeting | `SKIPPED`, 0% coverage | 1 |
-| [Acceptance only][acceptance-only] - Duck versus cheese | `PASSED` with `-m req` | 0 |
+| [Acceptance only][acceptance-only] - Duck versus cheese | `PASSED` with `-m tracereq` | 0 |
 
 ### Run an example
 
 Run the `Quickstart` example, then replace `quickstart` with another example folder.
 
 ```sh
-uv run --locked pytest examples/quickstart --req-strict
+uv run --locked pytest examples/quickstart --tracereq-strict
 ```
 
-For `acceptance_only`, add `-m req` to run only the marked test.
+For `acceptance_only`, add `-m tracereq` to run only the marked test.
 Without that filter, the unmarked test makes pytest fail.
 
 ### Inspect the JSON report
@@ -137,7 +156,7 @@ Without that filter, the unmarked test makes pytest fail.
 Export the example results to see the requirement status and individual test outcomes.
 
 ```sh
-uv run --locked pytest examples/quickstart --req-json=examples/quickstart/report.json
+uv run --locked pytest examples/quickstart --tracereq-json=examples/quickstart/report.json
 ```
 
 Open [examples/quickstart/report.json][report] after running the command.
@@ -157,10 +176,10 @@ fail. The examples are also verified in CI.
 
 See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
 
-[acceptance-only]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/acceptance_only
-[pizza]: https://github.com/Thyholt/pytest-reqmark/blob/master/examples/quickstart/test_behavior.py
-[quickstart]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/quickstart
-[missing-requirement]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/missing_requirement
-[partial-verification]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/partial_verification
-[report]: https://github.com/Thyholt/pytest-reqmark/blob/master/examples/quickstart/report.json
-[contributing]: https://github.com/Thyholt/pytest-reqmark/blob/master/CONTRIBUTING.md
+[acceptance-only]: https://github.com/Thyholt/pytest-tracereq/tree/master/examples/acceptance_only
+[pizza]: https://github.com/Thyholt/pytest-tracereq/blob/master/examples/quickstart/test_behavior.py
+[quickstart]: https://github.com/Thyholt/pytest-tracereq/tree/master/examples/quickstart
+[missing-requirement]: https://github.com/Thyholt/pytest-tracereq/tree/master/examples/missing_requirement
+[partial-verification]: https://github.com/Thyholt/pytest-tracereq/tree/master/examples/partial_verification
+[report]: https://github.com/Thyholt/pytest-tracereq/blob/master/examples/quickstart/report.json
+[contributing]: https://github.com/Thyholt/pytest-tracereq/blob/master/CONTRIBUTING.md

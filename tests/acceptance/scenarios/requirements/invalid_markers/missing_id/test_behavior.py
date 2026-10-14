@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.req()
+@pytest.mark.tracereq()
 def test_behavior():
     pass

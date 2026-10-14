@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.tracereq("REQ-001")
 def test_one_sock_survives():
     socks = ["left", "right"]
 
