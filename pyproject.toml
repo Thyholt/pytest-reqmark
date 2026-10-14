@@ -27,7 +27,7 @@ dev = [
 packages = ["src/pytest_reqmark"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "examples/test_examples.py"]
 addopts = "-ra -n auto"
 
 [tool.ruff]

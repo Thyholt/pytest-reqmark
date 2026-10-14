@@ -50,6 +50,8 @@ coverage.xml
 *.lcov
 .hypothesis/
 .pytest_cache/
+/examples/*/report.json
+!/examples/quickstart/report.json
 cover/
 
 # Translations
