@@ -155,6 +155,8 @@ The JSON report includes all declared requirements, their statuses and associate
 - Detect requirements with no associated tests as `MISSING`.
 - Aggregate setup, call and teardown outcomes correctly.
 - Treat `XFAILED` and `XPASSED` as unverified.
+- Report collected tests that never execute as `SKIPPED`, including collect-only
+  and early-stop runs.
 - A collection error must not result in a successful strict verdict.
 - If a test is never collected, it cannot be identified as deselected.
 
