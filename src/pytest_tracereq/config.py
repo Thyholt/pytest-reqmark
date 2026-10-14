@@ -29,10 +29,10 @@ def load_requirements(config: pytest.Config) -> list[str]:
             parser = configparser.ConfigParser(interpolation=None)
             parser.read(ini, encoding="utf-8")
 
-            if parser.has_option("pytest", "tracereq_requirements"):
+            if parser.has_option("pytest", "tracereq"):
                 inventories[ini.name] = [
                     line.strip()
-                    for line in parser.get("pytest", "tracereq_requirements").splitlines()
+                    for line in parser.get("pytest", "tracereq").splitlines()
                     if line.strip()
                 ]
     except (OSError, ValueError, configparser.Error) as error:

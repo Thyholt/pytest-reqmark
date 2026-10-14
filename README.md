@@ -24,7 +24,7 @@ Alternatively, use one ID per line in `pytest.ini`.
 
 ```ini
 [pytest]
-tracereq_requirements =
+tracereq =
     REQ-001
     REQ-002
 ```

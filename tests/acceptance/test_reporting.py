@@ -171,7 +171,7 @@ def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
     project = user_project([], empty_inventory)
     if config_file == "pytest.ini":
         (project.path / "pyproject.toml").unlink()
-        project.makefile(".ini", pytest="[pytest]\ntracereq_requirements =\n")
+        project.makefile(".ini", pytest="[pytest]\ntracereq =\n")
 
     result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
 

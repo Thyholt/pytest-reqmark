@@ -177,7 +177,7 @@ and `-k` is supported because pytest initially collects those tests.
 pytest-tracereq/
 ├── pyproject.toml
 ├── src/
-│   └── tracereq/
+│   └── pytest_tracereq/
 │       ├── __init__.py
 │       ├── plugin.py
 │       ├── config.py

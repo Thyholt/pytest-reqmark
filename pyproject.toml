@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytest-tracereq"
-version = "0.3.0"
+version = "0.4.0"
 description = "Executable acceptance criteria for pytest"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,7 +16,7 @@ Repository = "https://github.com/Thyholt/pytest-tracereq"
 Issues = "https://github.com/Thyholt/pytest-tracereq/issues"
 
 [project.entry-points.pytest11]
-tracereq = "tracereq.plugin"
+tracereq = "pytest_tracereq.plugin"
 
 [dependency-groups]
 dev = [
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tracereq"]
+packages = ["src/pytest_tracereq"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "examples/test_examples.py"]

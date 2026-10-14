@@ -2,7 +2,7 @@
 
 import pytest
 
-from tracereq.outcomes import phase_outcome
+from pytest_tracereq.outcomes import phase_outcome
 
 
 @pytest.mark.parametrize("when", ["setup", "teardown"])

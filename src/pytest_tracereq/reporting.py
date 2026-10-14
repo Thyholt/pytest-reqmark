@@ -8,7 +8,7 @@ from typing import TypedDict
 import pytest
 from _pytest.terminal import TerminalReporter
 
-from tracereq.outcomes import aggregate
+from pytest_tracereq.outcomes import aggregate
 
 
 class TestResult(TypedDict):
