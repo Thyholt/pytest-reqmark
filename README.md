@@ -98,6 +98,10 @@ Coverage is the percentage of declared requirements that are verified. With
 no declared requirements and no errors while finding tests, the acceptance
 check succeeds and coverage is 0.0%.
 
+The terminal report is red when acceptance verification fails. This includes
+errors while finding tests, even at 100% coverage. It follows pytest's color
+settings, so `--color=no` disables color.
+
 For a complete report, let pytest find the whole test suite. With `-k` or `-m`,
 the plugin still knows about the tests excluded by the filter and reports marked
 ones as `DESELECTED`. If you run only one folder, it cannot see tests in other

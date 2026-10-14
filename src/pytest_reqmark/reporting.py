@@ -77,14 +77,15 @@ def write_json(report: Report, path: Path) -> None:
 
 
 def write_terminal(report: Report, terminal: TerminalReporter) -> None:
-    terminal.write_sep("=", "pytest-reqmark")
+    red = not report["summary"]["verified"]
+    terminal.write_sep("=", "pytest-reqmark", red=red)
 
     width = max([len("Requirement"), *(len(identifier) for identifier in report["requirements"])])
-    terminal.write_line(f"{'Requirement':<{width}}  {'Status':<10}  Tests")
+    terminal.write_line(f"{'Requirement':<{width}}  {'Status':<10}  Tests", red=red)
 
     for identifier, result in report["requirements"].items():
         terminal.write_line(
-            f"{identifier:<{width}}  {result['status']:<10}  {len(result['tests'])}"
+            f"{identifier:<{width}}  {result['status']:<10}  {len(result['tests'])}", red=red
         )
 
     for label, field in (
@@ -92,9 +93,9 @@ def write_terminal(report: Report, terminal: TerminalReporter) -> None:
         ("Passed", "passed"),
         ("Unverified", "unverified"),
     ):
-        terminal.write_line(f"{label}: {report['summary'][field]}")
+        terminal.write_line(f"{label}: {report['summary'][field]}", red=red)
 
-    terminal.write_line(f"Coverage: {report['summary']['coverage']:.1f}%")
+    terminal.write_line(f"Coverage: {report['summary']['coverage']:.1f}%", red=red)
 
     if report["summary"]["collection_errors"]:
-        terminal.write_line(f"Collection errors: {report['summary']['collection_errors']}")
+        terminal.write_line(f"Collection errors: {report['summary']['collection_errors']}", red=red)
