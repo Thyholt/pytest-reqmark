@@ -61,6 +61,19 @@ pytest --tracereq-strict                # Report and fail on unverified requirem
 pytest -m tracereq --tracereq-strict    # Run only marked requirement tests
 ```
 
+For the example above, `pytest --tracereq-report` prints:
+
+```text
+=================================== tracereq ===================================
+Requirement  Status      Tests
+REQ-001      PASSED      1
+REQ-002      PASSED      1
+Requirements: 2
+Passed: 2
+Unverified: 0
+Coverage: 100.0%
+```
+
 ### Read requirement statuses
 
 A requirement is verified when every test marked with its ID passes. One passing
