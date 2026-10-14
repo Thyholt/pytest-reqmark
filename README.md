@@ -89,7 +89,7 @@ the acceptance check cannot succeed.
 ### Tests without markers
 
 Tests without a requirement marker do not change requirement statuses. They
-can still make pytest fail. In [the duck example](examples/acceptance_only),
+can still make pytest fail. In [the duck example][acceptance-only],
 the requirement passes, but the unmarked cheese test fails the pytest run.
 
 ### Check coverage
@@ -105,17 +105,17 @@ folders.
 
 ## Runnable examples
 
-Start with [the pizza](examples/quickstart/test_behavior.py), then try the other
+Start with [the pizza][pizza], then try the other
 examples to see what makes a requirement pass or remain unverified.
 
 Run the commands below from the repository root. Dependencies are installed automatically.
 
 | Example | With `--req-strict` | Exit code |
 | --- | --- | --- |
-| [Quickstart](examples/quickstart) - Two slices of pizza | `PASSED`, 100% coverage | 0 |
-| [Missing requirement](examples/missing_requirement) - A lost sock | `MISSING`, 50% coverage | 1 |
-| [Partial verification](examples/partial_verification) - Cat skips a meeting | `SKIPPED`, 0% coverage | 1 |
-| [Acceptance only](examples/acceptance_only) - Duck versus cheese | `PASSED` with `-m req` | 0 |
+| [Quickstart][quickstart] - Two slices of pizza | `PASSED`, 100% coverage | 0 |
+| [Missing requirement][missing-requirement] - A lost sock | `MISSING`, 50% coverage | 1 |
+| [Partial verification][partial-verification] - Cat skips a meeting | `SKIPPED`, 0% coverage | 1 |
+| [Acceptance only][acceptance-only] - Duck versus cheese | `PASSED` with `-m req` | 0 |
 
 ### Run an example
 
@@ -136,7 +136,7 @@ Export the example results to see the requirement status and individual test out
 uv run --locked pytest examples/quickstart --req-json=examples/quickstart/report.json
 ```
 
-Open [examples/quickstart/report.json](examples/quickstart/report.json) after running the command.
+Open [examples/quickstart/report.json][report] after running the command.
 
 ### Verify all examples
 
@@ -151,4 +151,12 @@ fail. The examples are also verified in CI.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, tests and pull requests.
+See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
+
+[acceptance-only]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/acceptance_only
+[pizza]: https://github.com/Thyholt/pytest-reqmark/blob/master/examples/quickstart/test_behavior.py
+[quickstart]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/quickstart
+[missing-requirement]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/missing_requirement
+[partial-verification]: https://github.com/Thyholt/pytest-reqmark/tree/master/examples/partial_verification
+[report]: https://github.com/Thyholt/pytest-reqmark/blob/master/examples/quickstart/report.json
+[contributing]: https://github.com/Thyholt/pytest-reqmark/blob/master/CONTRIBUTING.md
