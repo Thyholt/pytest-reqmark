@@ -13,6 +13,9 @@ jobs:
   check:
     runs-on: ubuntu-latest
     name: ${{ matrix.name }}
+    permissions:
+      contents: read
+      id-token: write
 
     strategy:
       fail-fast: false
@@ -25,7 +28,7 @@ jobs:
             command: pytest --collect-only -q
 
           - name: tests
-            command: pytest --tb=short -q
+            command: pytest --cov --cov-report=term-missing --cov-report=xml --tb=short -q
 
     steps:
       - uses: actions/checkout@v4
@@ -35,3 +38,12 @@ jobs:
       - run: uv sync --locked --python 3.10
 
       - run: uv run --locked ${{ matrix.command }}
+
+      - name: Upload code coverage
+        if: matrix.name == 'tests'
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+          files: coverage.xml
+          disable_search: true
+          fail_ci_if_error: true

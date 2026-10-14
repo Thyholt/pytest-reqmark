@@ -1,6 +1,14 @@
 # pytest-tracereq
 
-Requirement marking and tracing for pytest.
+[![PyPI version][pypi-version-badge]][pypi]
+[![Python versions][python-versions-badge]][pypi]
+[![Tests][tests-badge]][tests]
+[![Code coverage][codecov-badge]][codecov]
+
+**Know which requirements your tests actually verify.**
+
+Link requirements to your existing pytest tests, organize your suite your way, and get a clear
+verification report. Catch gaps locally and enforce verification in CI.
 
 ## Usage
 
@@ -172,3 +180,12 @@ See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
 [partial-verification]: https://github.com/Thyholt/pytest-tracereq/tree/master/examples/partial_verification
 [report]: https://github.com/Thyholt/pytest-tracereq/blob/master/examples/quickstart/report.json
 [contributing]: https://github.com/Thyholt/pytest-tracereq/blob/master/CONTRIBUTING.md
+
+[pypi]: https://pypi.org/project/pytest-tracereq/
+[pypi-version-badge]: https://img.shields.io/pypi/v/pytest-tracereq
+[python-versions-badge]: https://img.shields.io/badge/python-3.10%2B-blue
+[tests]: https://github.com/Thyholt/pytest-tracereq/actions/workflows/check.yml
+[tests-badge]: https://img.shields.io/github/actions/workflow/status/Thyholt/pytest-tracereq/check.yml?branch=master&label=tests
+
+[codecov]: https://app.codecov.io/gh/Thyholt/pytest-tracereq
+[codecov-badge]: https://codecov.io/gh/Thyholt/pytest-tracereq/branch/master/graph/badge.svg
