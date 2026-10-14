@@ -25,7 +25,7 @@ from tests.acceptance.scenarios.requirements.opaque_ids import dotted, simple, u
     ("requirement", "scenario"),
     [
         pytest.param("REQ-001", simple, id="REQ-001"),
-        pytest.param("training.yolo.config", dotted, id="training.yolo.config"),
+        pytest.param("requirement.group.item", dotted, id="requirement.group.item"),
         pytest.param("Krav / æøå : 1", unicode, id="Krav / æøå : 1"),
     ],
 )
