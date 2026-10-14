@@ -76,14 +76,16 @@ def write_json(report: Report, path: Path) -> None:
 
 def write_terminal(report: Report, terminal: TerminalReporter) -> None:
     red = not report["summary"]["verified"]
-    terminal.write_sep("=", "tracereq", red=red)
+    terminal.write_sep("=", "tracereq", red=red, green=not red)
 
     width = max([len("Requirement"), *(len(identifier) for identifier in report["requirements"])])
-    terminal.write_line(f"{'Requirement':<{width}}  {'Status':<10}  Tests", red=red)
+    terminal.write_line(f"{'Requirement':<{width}}  {'Status':<10}  Tests", red=red, green=not red)
 
     for identifier, result in report["requirements"].items():
         terminal.write_line(
-            f"{identifier:<{width}}  {result['status']:<10}  {len(result['tests'])}", red=red
+            f"{identifier:<{width}}  {result['status']:<10}  {len(result['tests'])}",
+            red=red,
+            green=not red,
         )
 
     for label, field in (
@@ -91,9 +93,11 @@ def write_terminal(report: Report, terminal: TerminalReporter) -> None:
         ("Passed", "passed"),
         ("Unverified", "unverified"),
     ):
-        terminal.write_line(f"{label}: {report['summary'][field]}", red=red)
+        terminal.write_line(f"{label}: {report['summary'][field]}", red=red, green=not red)
 
-    terminal.write_line(f"Coverage: {report['summary']['coverage']:.1f}%", red=red)
+    terminal.write_line(f"Coverage: {report['summary']['coverage']:.1f}%", red=red, green=not red)
 
     if report["summary"]["collection_errors"]:
-        terminal.write_line(f"Collection errors: {report['summary']['collection_errors']}", red=red)
+        terminal.write_line(
+            f"Collection errors: {report['summary']['collection_errors']}", red=red, green=not red
+        )

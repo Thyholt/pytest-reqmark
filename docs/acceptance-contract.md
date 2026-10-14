@@ -110,7 +110,7 @@ collection, but `verified` must remain false when collection errors exist.
 
 When terminal colors are enabled, the entire acceptance report is red if
 `summary.verified` is false, both with `--tracereq-report` and `--tracereq-strict`.
-Successful verification retains the normal color, including zero requirements
+Successful verification makes the entire report green, including zero requirements
 and runs with failing unmarked tests. The report respects pytest's color
 settings, including `--color=no`.
 
