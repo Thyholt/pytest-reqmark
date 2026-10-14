@@ -1,6 +1,6 @@
-# Acceptance contract for review
+# Acceptance contract
 
-These are proposed executable acceptance requirements, not implemented behavior.
+These executable acceptance requirements define the implemented v0.1 behavior.
 The v0.1 specification uses the agreed project name in
 [specification-v0.1.md](specification-v0.1.md).
 
@@ -22,7 +22,7 @@ req_requirements =
     REQ-002
 ```
 
-Proposed decisions for approval:
+Accepted configuration decisions:
 
 - `req_requirements` uses one ID per line in `pytest.ini`.
 - If both files declare inventories, fail with a message naming both files rather
@@ -40,7 +40,7 @@ section `[tool.pytest-reqmark]`.
 Confirmed requirement: zero declared requirements means success with zero
 requirements, both for an explicitly empty inventory and when no requirement
 configuration exists. The report contains zero requirements, zero passed and
-zero unverified. The proposed numeric coverage for this case is 0.0%.
+zero unverified. Numeric coverage for this case is 0.0%.
 A marked test referencing an undeclared ID is still rejected.
 
 ## User-facing acceptance scenarios
@@ -56,9 +56,9 @@ A marked test referencing an undeclared ID is still rejected.
 
 Tests invoke the installed plugin through pytest, without importing its internal
 modules. Small helper fixtures only create user projects and read JSON files.
-Implementation unit tests will be chosen during implementation.
+Unit tests cover domain edge cases alongside these user-facing scenarios.
 
-## Proposed JSON contract
+## JSON contract
 
 ```json
 {
@@ -86,6 +86,10 @@ Inventory order determines terminal rows; test collection order determines JSON
 test lists. Coverage remains a numeric percentage in JSON and is rounded to one
 decimal place in the terminal. Tests with setup/call/teardown reports have one
 final outcome per node ID.
+
+Collected tests that never execute are reported as `SKIPPED`, including tests
+left after an early stop and tests collected with `--collect-only`. They retain
+their node IDs and keep associated requirements unverified.
 
 `summary.verified` is the acceptance verdict, independently of pytest's exit
 status. It is true only when all declared requirements are PASSED and there
@@ -120,8 +124,8 @@ The harness copies each package directory into an isolated pytest project.
 The outer test collection excludes the scenario directory, so deliberately
 failing examples run only inside their acceptance scenarios.
 
-## Review and next step
+## Verification
 
-Review these scenarios and the proposed decisions above. After approval, implement
-one behavior at a time, keep the acceptance tests as the public contract, add
-appropriate unit tests, and make both GitHub Actions workflows pass.
+Keep these acceptance tests as the public contract. Unit tests cover meaningful
+domain edge cases without mocking pytest's execution machinery. Both GitHub
+Actions workflows check the implementation, including installed-wheel discovery.
