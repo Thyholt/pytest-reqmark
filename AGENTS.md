@@ -310,6 +310,8 @@ underlying issue goes away (model upgrades, refactors, process changes).
 - A rejected acceptance input must produce a domain diagnostic; an unrecognized
   CLI option is not evidence that marker or inventory validation works.
 - Check aggregation in both test collection orders to catch first-result shortcuts.
+- Observe scenario execution through stdout, and pair every no-execution check with a positive
+  execution check so missing instrumentation cannot make the test pass.
 - Keep acceptance expectations local and example behavior in named, lintable Python
   scenario files; do not import scenarios from other test modules or generate
   test bodies through substitutions and fallbacks. Exclude scenario files from
