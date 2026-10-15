@@ -287,6 +287,8 @@ underlying issue goes away (model upgrades, refactors, process changes).
   use enabled project workflows instead of disabled home-level workflows.
 - Keep pull request descriptions short, covering the change and essential validation.
 - Keep README guidance focused on what users learn from runnable public examples.
+  Present its motivation as one connected argument through engineering principles,
+  without naming specific development methods.
   For terminology edits, preserve its structure, examples and public configuration keys.
   Run example commands from the repository root, without `cd` or `--project`.
   Document the shared command once, and explain only the options that differ.

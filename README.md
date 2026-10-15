@@ -10,6 +10,24 @@
 Link specifications to your existing pytest tests, organize your test suite your way, and see
 which specifications your test suite verifies. Detect missing tests and enforce verification in CI.
 
+## Why pytest-xspec?
+
+As software engineers, we like code. Ask us what the software does, and we might say,
+"Just read the code." But stakeholders need a shared understanding of what the software
+should do. We turn to acceptance tests to make those expectations precise, using examples
+in the language of the business.
+
+For many of us, making a whole test suite read as a clear specification is costly.
+It takes time and practice, and the work continues as the codebase grows. Related behavior
+spreads across files, implementation checks sit beside acceptance tests, and the overall
+requirements become harder to see.
+
+`pytest-xspec` connects a readable overview of your requirements to the tests that verify them.
+Keep specifications in a document your team can discuss, put tests where they make sense,
+and link them with IDs. The report shows which requirements are verified, which remain
+unverified and which have no tests. When business asks what is covered, you have an answer
+they can read.
+
 ## Usage
 
 Install `pytest-xspec` into your pytest environment. The plugin is discovered
