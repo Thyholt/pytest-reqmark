@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.xspec("REQ-001")
-def test_one_sock_survives():
+def test_one_sock_survives() -> None:
     socks = ["left", "right"]
 
     socks.remove("right")

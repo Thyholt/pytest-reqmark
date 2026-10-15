@@ -1,5 +1,7 @@
 """Strict mode enforces acceptance; pytest retains its ordinary failure behavior."""
 
+from types import ModuleType
+
 import pytest
 
 from tests.acceptance.scenarios.cli import (
@@ -18,9 +20,10 @@ from tests.acceptance.scenarios.cli.strict_unverified_outcome import (
     unexpected_pass,
 )
 from tests.acceptance.scenarios.cli.unmarked_outcomes import failed, skipped
+from tests.acceptance.types import ReadReport, UserProject
 
 
-def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
+def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project: UserProject) -> None:
     project = user_project(["REQ-001"], plain_pytest)
 
     result = project.runpytest_subprocess()
@@ -40,7 +43,9 @@ def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
         pytest.param(setup_error, "ERROR", id="setup-error"),
     ],
 )
-def test_strict_mode_rejects_every_executed_unverified_outcome(user_project, scenario, status):
+def test_strict_mode_rejects_every_executed_unverified_outcome(
+    user_project: UserProject, scenario: ModuleType, status: str
+) -> None:
     project = user_project(["REQ-001"], scenario)
 
     result = project.runpytest_subprocess("--xspec-strict")
@@ -51,7 +56,7 @@ def test_strict_mode_rejects_every_executed_unverified_outcome(user_project, sce
     assert status in output
 
 
-def test_strict_mode_rejects_missing_requirements(user_project):
+def test_strict_mode_rejects_missing_requirements(user_project: UserProject) -> None:
     project = user_project(["REQ-001"], missing_requirement)
 
     result = project.runpytest_subprocess("--xspec-strict")
@@ -60,7 +65,7 @@ def test_strict_mode_rejects_missing_requirements(user_project):
     assert "MISSING" in result.stdout.str()
 
 
-def test_strict_mode_rejects_deselected_requirement_tests(user_project):
+def test_strict_mode_rejects_deselected_requirement_tests(user_project: UserProject) -> None:
     project = user_project(["REQ-001"], deselected_requirement)
 
     result = project.runpytest_subprocess("-k", "selected", "--xspec-strict")
@@ -69,7 +74,9 @@ def test_strict_mode_rejects_deselected_requirement_tests(user_project):
     assert "DESELECTED" in result.stdout.str()
 
 
-def test_strict_mode_succeeds_and_prints_a_report_when_every_requirement_passes(user_project):
+def test_strict_mode_succeeds_and_prints_a_report_when_every_requirement_passes(
+    user_project: UserProject,
+) -> None:
     project = user_project(["REQ-001"], all_requirements_pass)
 
     result = project.runpytest_subprocess("--xspec-strict")
@@ -88,8 +95,11 @@ def test_strict_mode_succeeds_and_prints_a_report_when_every_requirement_passes(
     ],
 )
 def test_unmarked_outcomes_do_not_change_acceptance_verification(
-    user_project, read_report, scenario, expected_exit
-):
+    user_project: UserProject,
+    read_report: ReadReport,
+    scenario: ModuleType,
+    expected_exit: pytest.ExitCode,
+) -> None:
     project = user_project(["REQ-001"], scenario)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -100,7 +110,9 @@ def test_unmarked_outcomes_do_not_change_acceptance_verification(
     assert result.ret == expected_exit
 
 
-def test_acceptance_only_ci_ignores_failing_unmarked_tests(user_project, read_report):
+def test_acceptance_only_ci_ignores_failing_unmarked_tests(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], acceptance_only)
 
     result = project.runpytest_subprocess(
@@ -112,7 +124,9 @@ def test_acceptance_only_ci_ignores_failing_unmarked_tests(user_project, read_re
     assert report["summary"]["unverified"] == 0
 
 
-def test_a_collection_error_prevents_a_successful_strict_verdict(user_project, read_report):
+def test_a_collection_error_prevents_a_successful_strict_verdict(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], collection_error)
 
     result = project.runpytest_subprocess(

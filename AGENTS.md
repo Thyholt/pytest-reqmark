@@ -53,10 +53,12 @@ These rules override everything else in this file when in conflict:
 **Goal: the minimum code that solves the stated problem. Nothing speculative.**
 
 - No features beyond what was asked.
-- No abstractions for single-use code. No configurability, flexibility, or hooks that were not requested.
+- No abstractions for single-use code. No configurability, flexibility, or hooks that were not
+  requested.
 - No error handling for impossible scenarios. Handle the failures that can actually happen.
 - If the solution runs 200 lines and could be 50, rewrite it before showing it.
-- If you find yourself adding "for future extensibility", stop. Future extensibility is a future decision.
+- If you find yourself adding "for future extensibility", stop. Future extensibility is a future
+  decision.
 - Bias toward deleting code over adding code. Shipping less is almost always better.
 
 The test: would a senior engineer reading the diff call this overcomplicated? If yes, simplify.
@@ -87,8 +89,10 @@ Rewrite vague asks into verifiable goals before starting:
 
 - "Add validation" becomes "Write tests for invalid inputs (empty, malformed, oversized), then make
   them pass."
-- "Fix the bug" becomes "Write a failing test that reproduces the reported symptom, then make it pass."
-- "Refactor X" becomes "Ensure the existing test suite passes before and after, and no public API changes."
+- "Fix the bug" becomes "Write a failing test that reproduces the reported symptom, then make it
+  pass."
+- "Refactor X" becomes "Ensure the existing test suite passes before and after, and no public API
+  changes."
 - "Make it faster" becomes "Benchmark the current hot path, identify the bottleneck with profiling,
   change it, show the benchmark is faster."
 
@@ -110,7 +114,8 @@ For every task:
 - For UI changes, verify visually: screenshot before, screenshot after, describe the diff.
 - Use CLI tools (gh, aws, gcloud, kubectl) when they exist. They are more context-efficient than
   reading docs or hitting APIs unauthenticated.
-- When reading logs, errors, or stack traces, read the whole thing. Half-read traces produce wrong fixes.
+- When reading logs, errors, or stack traces, read the whole thing. Half-read traces produce wrong
+  fixes.
 
 ---
 
@@ -184,7 +189,8 @@ After every session where the agent did something wrong:
 4. Every few weeks, prune. For each line, ask: "Would removing this cause the agent to make a
    mistake?" If no, delete. Bloated AGENTS.md files get ignored wholesale.
 
-Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are fighting your own config.
+Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are fighting your own
+config.
 
 ---
 
@@ -194,10 +200,11 @@ Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are 
 
 - Language and version: Python 3.10+.
 - Framework: pytest 8+, native hooks and the `pytest11` entry point.
-- Distribution: `pytest-reqmark`; import package: `pytest_reqmark`.
-- Use `reqmark` for the pytest entry point and `[tool.pytest-reqmark]` for TOML configuration.
+- Distribution: `pytest-xspec`; import package: `pytest_xspec`.
+- Use `xspec` for the pytest entry point and `[tool.xspec]` for TOML configuration.
 - Package manager: uv; build backend: hatchling.
-- Quality tools: ruff for lint and formatting, ty for type checking.
+- Quality tools: ruff for Python lint and formatting, rumdl for Markdown lint,
+  ty for type checking.
 - Runtime: installed pytest plugin; no service or deployment infrastructure.
 
 ### Commands
@@ -209,18 +216,19 @@ Keep this file concise. Under 300 lines is a good ceiling. Over 500 and you are 
 - Test (single behavior): `uv run pytest tests/acceptance/test_cli.py -k strict_mode_succeeds`.
 - Collect acceptance tests: `uv run pytest tests/acceptance --collect-only -q`.
 - Lint: `uv run ruff check .`.
+- Markdown lint: `uv run rumdl check .`.
 - Check formatting: `uv run ruff format --check .`.
 - Format: `uv run ruff format .`.
 - Typecheck: `uv run ty check`.
 
 Prefer single-file or single-test runs during iteration. Full suites are for final verification.
 These commands come from project configuration and CI; their presence is not proof they pass.
-The plugin is an empty scaffold awaiting acceptance-test approval. Behavior tests
-are expected to fail until implementation. Never hide this with skips or xfails.
+The plugin implements the approved acceptance contract. Never hide failing
+behavior tests with skips or xfails.
 
 ### Layout
 
-- Source: `src/pytest_reqmark/`.
+- Source: `src/pytest_xspec/`.
 - User-facing acceptance scenarios: `tests/acceptance/`.
 - Test harness: root `conftest.py` and `tests/acceptance/conftest.py`.
 - Specification: `docs/specification-v0.1.md`.
@@ -234,11 +242,23 @@ are expected to fail until implementation. Never hide this with skips or xfails.
 - Obtain the user's explicit ok to the acceptance tests before plugin implementation.
 - After approval, use red-green-refactor and choose meaningful unit tests as needed.
 - Assert public outcomes through real pytest runs; avoid coupling acceptance tests to internals.
+- Acceptance tests run isolated user projects, with common setup in fixtures.
+  Use real supported configuration files, including pytest settings such as marker registration.
+- Keep unit tests independent of the filesystem where possible, testing validation directly.
+  Cover file parsing and loading in acceptance tests.
 - Preserve the specification and accepted user corrections as the behavioral contract.
 - Support requirement configuration only in `pyproject.toml` or `pytest.ini`.
 - Zero declared requirements means acceptance success with zero requirements.
 - Acceptance verification ignores unmarked test outcomes; ordinary pytest exit behavior remains.
 - Python style follows ruff: Python 3.10 target, 100-character lines and sorted imports.
+- Apply the same annotation and type rules to library code, tests, fixtures, scenarios and examples.
+  Annotate function parameters and return values, and supply generic type arguments.
+  Annotations on `*args` and `**kwargs` are optional and may use `Any`.
+  Otherwise prefer concrete types or `object` with runtime narrowing over `Any`.
+- Use casts only after runtime validation or at serialization boundaries with a known schema.
+  A cast does not validate the value. Keep lint exceptions in [pyproject.toml](pyproject.toml).
+  Limit S101 exceptions to test code, including examples, and FBT001 exceptions to `tests/`.
+- Update public usage documentation when users need to do something differently.
 - Runtime dependencies must remain limited to pytest for v0.1.
 - Keep `__init__.py` files completely empty: no docstrings, comments or code.
   The package-root `__init__.py` may only export public user-facing functions.
@@ -261,13 +281,32 @@ underlying issue goes away (model upgrades, refactors, process changes).
 - Whenever you use or mention a skill, include a clickable Markdown link to its
   exact `SKILL.md` file, using an absolute local path so the user can open it in
   their editor.
-- Keep AGENTS.md changes uncommitted until the user explicitly requests their
-  final consolidated commit; ordinary commit requests exclude this file.
-- Keep README scenario guidance focused on usage; document package initializer
-  and editor-navigation conventions in developer instructions.
-- Use domain-neutral requirement IDs and test names in specification examples.
+- Read `.codex/config.toml` before selecting skills and honor `enabled = false`;
+  use enabled project workflows instead of disabled home-level workflows.
+- Keep pull request descriptions short, covering the change and essential validation.
+- Keep README guidance focused on what users learn from runnable public examples.
+  For terminology edits, preserve its structure, examples and public configuration keys.
+  Run example commands from the repository root, without `cd` or `--project`.
+  Document the shared command once, and explain only the options that differ.
+  Use `uv run --locked` to sync automatically without a separate setup command.
+  Link generated example reports after the commands that create them.
+  Keep the acceptance contract and acceptance scenarios internal. Document package
+  initializer and editor-navigation conventions in developer instructions.
+- Keep coding and testing rules in AGENTS.md. Keep contributor setup and workflow
+  in CONTRIBUTING.md, linked from README, and link to AGENTS.md for those rules.
+  Link to tool and CI configuration instead of repeating their settings and checks.
+- Use commas and full stops in README prose, never semicolons or dashes.
+  Use colons between example names and captions. Keep table outcomes short.
+  Preserve required punctuation in commands, names, code and Markdown syntax.
+- Explain report terminology in plain language and illustrate combined test
+  outcomes with a concrete example. Split README usage and runnable example
+  commands into short sections with descriptive headings for each task or topic.
+- Use domain-neutral requirement IDs and test names in specification examples,
+  acceptance tests and their scenario files.
 - Structure tests as Arrange, Act, Assert blocks separated by blank lines;
   keep execution out of assertions and omit AAA comments.
+- Use parallel names for related validation tests, distinguishing file structure from
+  requirement inventory contents rather than mixing file-format and domain terms.
 - A rejected acceptance input must produce a domain diagnostic; an unrecognized
   CLI option is not evidence that marker or inventory validation works.
 - Check aggregation in both test collection orders to catch first-result shortcuts.
@@ -281,13 +320,22 @@ underlying issue goes away (model upgrades, refactors, process changes).
   Inline requirement and summary lookups in assertions instead of introducing
   aliases for report sections.
 - Refer to scenarios through package imports, not string paths; use their package
-  search paths when copying. Add empty `__init__.py` files only in referenced
-  scenario leaf folders to give editor navigation a concrete target.
+  search paths when copying. Within scenarios, add empty `__init__.py` files only
+  in referenced leaf folders to give editor navigation a concrete target.
 - Assert complete test identities and outcomes, not only counts or sets that
   can hide duplicated, omitted or unrelated report records.
-- Keep the product name `pytest-reqmark` consistent across packaging, configuration,
-  reports and documentation; use `pytest_reqmark` for Python imports.
+- Keep the product name `pytest-xspec` consistent across packaging, configuration,
+  reports and documentation; use `pytest_xspec` for Python imports.
 - Trigger CI on pull requests and pushes to `master`; avoid duplicate feature-branch push runs.
+- Report collected tests that never execute as SKIPPED, including collect-only
+  and early-stop runs; keep their associated requirements unverified.
+- Keep `tests`, `tests/unit` and `tests/acceptance` as packages with empty
+  `__init__.py` files so unit and acceptance modules can share basenames.
+- Separate completed control-flow blocks from following statements with a blank line.
+- After a repository rename, check prior integration setup and retry failed external
+  uploads before requesting manual account changes.
+- For stale badges, verify both the source image and GitHub's proxied image
+  before claiming the issue is fixed.
 
 ---
 

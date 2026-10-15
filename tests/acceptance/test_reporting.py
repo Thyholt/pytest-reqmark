@@ -1,13 +1,18 @@
 """Reports show all declared requirements and count verified requirements, not tests."""
 
+from types import ModuleType
+
 import pytest
 
 from tests.acceptance.scenarios.cli import all_requirements_pass, collection_error
 from tests.acceptance.scenarios.cli.unmarked_outcomes import failed
 from tests.acceptance.scenarios.reporting import empty_inventory, summary
+from tests.acceptance.types import ReadReport, UserProject
 
 
-def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(user_project):
+def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(
+    user_project: UserProject,
+) -> None:
     project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
     result = project.runpytest_subprocess("--xspec-report")
@@ -34,7 +39,9 @@ def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(use
         pytest.param("--xspec-strict", pytest.ExitCode.TESTS_FAILED, id="strict"),
     ],
 )
-def test_an_unverified_terminal_report_is_red(user_project, report_option, expected_exit):
+def test_an_unverified_terminal_report_is_red(
+    user_project: UserProject, report_option: str, expected_exit: pytest.ExitCode
+) -> None:
     project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
     result = project.runpytest_subprocess(report_option, "--color=yes")
@@ -57,8 +64,8 @@ def test_an_unverified_terminal_report_is_red(user_project, report_option, expec
 
 @pytest.mark.parametrize("report_option", ["--xspec-report", "--xspec-strict"])
 def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
-    user_project, read_report, report_option
-):
+    user_project: UserProject, read_report: ReadReport, report_option: str
+) -> None:
     project = user_project(["REQ-001"], collection_error)
 
     result = project.runpytest_subprocess(
@@ -100,8 +107,14 @@ def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
 )
 @pytest.mark.parametrize("report_option", ["--xspec-report", "--xspec-strict"])
 def test_a_verified_terminal_report_is_green(
-    user_project, read_report, requirements, scenario, expected_exit, coverage, report_option
-):
+    user_project: UserProject,
+    read_report: ReadReport,
+    requirements: list[str],
+    scenario: ModuleType,
+    expected_exit: pytest.ExitCode,
+    coverage: str,
+    report_option: str,
+) -> None:
     project = user_project(requirements, scenario)
 
     result = project.runpytest_subprocess(report_option, "--color=yes", "--xspec-json=report.json")
@@ -128,7 +141,9 @@ def test_a_verified_terminal_report_is_green(
         pytest.param(["REQ-001", "REQ-002", "REQ-003"], summary, "33.3%", id="unverified"),
     ],
 )
-def test_terminal_report_color_can_be_disabled(user_project, requirements, scenario, coverage):
+def test_terminal_report_color_can_be_disabled(
+    user_project: UserProject, requirements: list[str], scenario: ModuleType, coverage: str
+) -> None:
     project = user_project(requirements, scenario)
 
     result = project.runpytest_subprocess("--xspec-report", "--color=no")
@@ -139,8 +154,8 @@ def test_terminal_report_color_can_be_disabled(user_project, requirements, scena
 
 
 def test_json_report_includes_all_requirements_individual_tests_and_summary(
-    user_project, read_report
-):
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -172,8 +187,8 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
 
 
 def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
-    user_project, read_report
-):
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project([], empty_inventory)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")

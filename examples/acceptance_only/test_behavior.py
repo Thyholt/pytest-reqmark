@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.xspec("REQ-001")
-def test_duck_says_quack():
+def test_duck_says_quack() -> None:
     duck = {"sound": "quack"}
 
     sound = duck["sound"]
@@ -10,7 +10,7 @@ def test_duck_says_quack():
     assert sound == "quack"
 
 
-def test_moon_is_made_of_cheese():
+def test_moon_is_made_of_cheese() -> None:
     moon = {"material": "rock"}
 
     material = moon["material"]

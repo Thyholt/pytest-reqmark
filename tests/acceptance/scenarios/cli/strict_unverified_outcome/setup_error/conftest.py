@@ -1,6 +1,8 @@
+from typing import NoReturn
+
 import pytest
 
 
 @pytest.fixture
-def broken():
+def broken() -> NoReturn:
     raise RuntimeError("setup failed")
