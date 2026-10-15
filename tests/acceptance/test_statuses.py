@@ -1,5 +1,7 @@
 """Users can see why a requirement is or is not verified."""
 
+from types import ModuleType
+
 import pytest
 
 from tests.acceptance.expectations import expected
@@ -33,6 +35,7 @@ from tests.acceptance.scenarios.statuses.reported_outcome import (
     skipped_test,
     unexpected_pass,
 )
+from tests.acceptance.types import ReadReport, UserProject
 
 
 @pytest.mark.parametrize(
@@ -47,8 +50,8 @@ from tests.acceptance.scenarios.statuses.reported_outcome import (
     ],
 )
 def test_the_report_explains_the_outcome_of_a_marked_test(
-    user_project, read_report, scenario, status
-):
+    user_project: UserProject, read_report: ReadReport, scenario: ModuleType, status: str
+) -> None:
     project = user_project(["REQ-001"], scenario)
 
     project.runpytest_subprocess("--xspec-json=report.json")
@@ -60,7 +63,9 @@ def test_the_report_explains_the_outcome_of_a_marked_test(
     assert report["summary"]["verified"] is (status == "PASSED")
 
 
-def test_teardown_errors_make_a_passing_test_unverified(user_project, read_report):
+def test_teardown_errors_make_a_passing_test_unverified(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], teardown_error_after_pass)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -72,7 +77,9 @@ def test_teardown_errors_make_a_passing_test_unverified(user_project, read_repor
     )
 
 
-def test_teardown_errors_take_precedence_over_a_test_failure(user_project, read_report):
+def test_teardown_errors_take_precedence_over_a_test_failure(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], teardown_error_after_failure)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -84,7 +91,9 @@ def test_teardown_errors_take_precedence_over_a_test_failure(user_project, read_
     )
 
 
-def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
+def test_a_fixture_skip_is_reported_as_skipped(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], fixture_skip)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -109,8 +118,12 @@ def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
     ],
 )
 def test_fixture_expected_failures_are_xfailed_and_keep_requirements_unverified(
-    user_project, read_report, scenario, options, expected_exit
-):
+    user_project: UserProject,
+    read_report: ReadReport,
+    scenario: ModuleType,
+    options: tuple[str, ...],
+    expected_exit: pytest.ExitCode,
+) -> None:
     project = user_project(["REQ-001"], scenario)
 
     result = project.runpytest_subprocess("--xspec-json=report.json", *options)
@@ -123,7 +136,9 @@ def test_fixture_expected_failures_are_xfailed_and_keep_requirements_unverified(
     assert report["summary"]["verified"] is False
 
 
-def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, read_report):
+def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], strict_xpass)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -136,7 +151,9 @@ def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, 
     )
 
 
-def test_an_assertion_mentioning_xpass_is_reported_as_failed(user_project, read_report):
+def test_an_assertion_mentioning_xpass_is_reported_as_failed(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], assertion_with_xpass_text)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -153,7 +170,9 @@ def test_an_assertion_mentioning_xpass_is_reported_as_failed(user_project, read_
     "test_order",
     [("test_setup_error", "test_failure"), ("test_failure", "test_setup_error")],
 )
-def test_setup_errors_take_priority_over_test_failures(user_project, read_report, test_order):
+def test_setup_errors_take_priority_over_test_failures(
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], setup_error_over_failure)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
     expected_outcomes = {
@@ -173,7 +192,9 @@ def test_setup_errors_take_priority_over_test_failures(user_project, read_report
     "test_order",
     [("test_failure", "test_unexpected_pass"), ("test_unexpected_pass", "test_failure")],
 )
-def test_failures_take_priority_over_unexpected_passes(user_project, read_report, test_order):
+def test_failures_take_priority_over_unexpected_passes(
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], failure_over_xpass)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
     expected_outcomes = {
@@ -199,8 +220,8 @@ def test_failures_take_priority_over_unexpected_passes(user_project, read_report
     ],
 )
 def test_unexpected_passes_take_priority_over_expected_failures(
-    user_project, read_report, test_order
-):
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], xpass_over_xfail)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
     expected_outcomes = {
@@ -222,7 +243,9 @@ def test_unexpected_passes_take_priority_over_expected_failures(
     "test_order",
     [("test_expected_failure", "test_skipped"), ("test_skipped", "test_expected_failure")],
 )
-def test_expected_failures_take_priority_over_skips(user_project, read_report, test_order):
+def test_expected_failures_take_priority_over_skips(
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], xfail_over_skip)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
     expected_outcomes = {
@@ -244,7 +267,9 @@ def test_expected_failures_take_priority_over_skips(user_project, read_report, t
     "test_order",
     [("test_skipped", "test_excluded"), ("test_excluded", "test_skipped")],
 )
-def test_skips_take_priority_over_deselection(user_project, read_report, test_order):
+def test_skips_take_priority_over_deselection(
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], skip_over_deselection)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
     expected_outcomes = {
@@ -269,8 +294,8 @@ def test_skips_take_priority_over_deselection(user_project, read_report, test_or
     [("test_excluded", "test_passed"), ("test_passed", "test_excluded")],
 )
 def test_deselection_prevents_verification_despite_a_passing_test(
-    user_project, read_report, test_order
-):
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], deselection_over_pass)
     node_ids = [f"test_behavior.py::{name}" for name in test_order]
     expected_outcomes = {
@@ -290,7 +315,9 @@ def test_deselection_prevents_verification_despite_a_passing_test(
     )
 
 
-def test_a_requirement_is_verified_when_both_associated_tests_pass(user_project, read_report):
+def test_a_requirement_is_verified_when_both_associated_tests_pass(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], both_tests_pass)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -315,8 +342,8 @@ def test_a_requirement_is_verified_when_both_associated_tests_pass(user_project,
     ],
 )
 def test_one_passing_test_does_not_verify_a_requirement_with_an_unverified_test(
-    user_project, read_report, scenario, status
-):
+    user_project: UserProject, read_report: ReadReport, scenario: ModuleType, status: str
+) -> None:
     project = user_project(["REQ-001"], scenario)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -333,7 +360,9 @@ def test_one_passing_test_does_not_verify_a_requirement_with_an_unverified_test(
     assert report["summary"]["verified"] is False
 
 
-def test_collect_only_keeps_associated_tests_unverified(user_project, read_report):
+def test_collect_only_keeps_associated_tests_unverified(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], both_tests_pass)
 
     result = project.runpytest_subprocess(
@@ -352,7 +381,9 @@ def test_collect_only_keeps_associated_tests_unverified(user_project, read_repor
     assert report["summary"]["verified"] is False
 
 
-def test_early_stop_reports_a_collected_but_unexecuted_test_as_skipped(user_project, read_report):
+def test_early_stop_reports_a_collected_but_unexecuted_test_as_skipped(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001", "REQ-002"], early_stop)
 
     result = project.runpytest_subprocess(
@@ -374,8 +405,8 @@ def test_early_stop_reports_a_collected_but_unexecuted_test_as_skipped(user_proj
     "test_order", [("test_first", "test_second"), ("test_second", "test_first")]
 )
 def test_a_passing_test_does_not_verify_a_requirement_when_another_test_never_runs(
-    user_project, read_report, test_order
-):
+    user_project: UserProject, read_report: ReadReport, test_order: tuple[str, str]
+) -> None:
     project = user_project(["REQ-001"], one_unexecuted_test)
     node_ids = [
         f"test_behavior.py::{test_order[0]}",

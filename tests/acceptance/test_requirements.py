@@ -1,5 +1,7 @@
 """Declaring requirements and linking existing tests without changing their structure."""
 
+from types import ModuleType
+
 import pytest
 
 from tests.acceptance.expectations import expected
@@ -18,6 +20,7 @@ from tests.acceptance.scenarios.requirements.invalid_markers import (
     unknown_id,
 )
 from tests.acceptance.scenarios.requirements.opaque_ids import dotted, simple, unicode
+from tests.acceptance.types import ReadReport, UserProject
 
 
 @pytest.mark.parametrize(
@@ -28,7 +31,9 @@ from tests.acceptance.scenarios.requirements.opaque_ids import dotted, simple, u
         pytest.param("Krav / æøå : 1", unicode, id="Krav / æøå : 1"),
     ],
 )
-def test_requirement_ids_are_opaque_strings(user_project, read_report, requirement, scenario):
+def test_requirement_ids_are_opaque_strings(
+    user_project: UserProject, read_report: ReadReport, requirement: str, scenario: ModuleType
+) -> None:
     project = user_project([requirement], scenario)
 
     result = project.runpytest_subprocess("--xspec-json=report.json", "--strict-markers")
@@ -38,7 +43,9 @@ def test_requirement_ids_are_opaque_strings(user_project, read_report, requireme
     assert report["requirements"][requirement]["status"] == "PASSED"
 
 
-def test_one_test_can_verify_several_requirements(user_project, read_report):
+def test_one_test_can_verify_several_requirements(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001", "REQ-002"], multiple_requirements)
     expected_tests = [("test_behavior.py::test_shared_behavior", "PASSED")]
 
@@ -51,7 +58,9 @@ def test_one_test_can_verify_several_requirements(user_project, read_report):
         assert expected(requirement).to_have(status="PASSED", tests=expected_tests)
 
 
-def test_every_parameterized_case_is_an_individual_acceptance_test(user_project, read_report):
+def test_every_parameterized_case_is_an_individual_acceptance_test(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], parameterized_cases)
     expected_tests = [
         ("test_behavior.py::test_behavior[first]", "PASSED"),
@@ -68,7 +77,9 @@ def test_every_parameterized_case_is_an_individual_acceptance_test(user_project,
     )
 
 
-def test_requirement_markers_can_be_inherited_from_a_test_class(user_project, read_report):
+def test_requirement_markers_can_be_inherited_from_a_test_class(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], class_markers)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -85,7 +96,9 @@ def test_requirement_markers_can_be_inherited_from_a_test_class(user_project, re
     )
 
 
-def test_repeating_a_marker_does_not_count_the_same_test_twice(user_project, read_report):
+def test_repeating_a_marker_does_not_count_the_same_test_twice(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
     project = user_project(["REQ-001"], repeated_marker)
 
     result = project.runpytest_subprocess("--xspec-json=report.json")
@@ -112,8 +125,8 @@ def test_repeating_a_marker_does_not_count_the_same_test_twice(user_project, rea
     "reporting", [(), ("--xspec-report",)], ids=["plain-pytest", "with-report"]
 )
 def test_invalid_requirement_markers_are_rejected_with_a_useful_message(
-    user_project, scenario, diagnostic, reporting
-):
+    user_project: UserProject, scenario: ModuleType, diagnostic: str, reporting: tuple[str, ...]
+) -> None:
     project = user_project(["REQ-001", "REQ-002"], scenario)
 
     result = project.runpytest_subprocess(*reporting)
@@ -125,7 +138,9 @@ def test_invalid_requirement_markers_are_rejected_with_a_useful_message(
     assert "test_behavior.py::test_behavior" in message
 
 
-def test_invalid_markers_are_rejected_even_when_the_test_is_deselected(user_project):
+def test_invalid_markers_are_rejected_even_when_the_test_is_deselected(
+    user_project: UserProject,
+) -> None:
     project = user_project(["REQ-001"], invalid_deselected_marker)
 
     result = project.runpytest_subprocess("-k", "selected", "--xspec-report")

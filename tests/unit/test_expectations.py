@@ -1,5 +1,6 @@
 """Requirement predicates compare complete reports without modifying them."""
 
+from collections.abc import Mapping
 from copy import deepcopy
 
 import pytest
@@ -28,7 +29,9 @@ from tests.acceptance.expectations import expected
         pytest.param({"status": "MISSING", "tests": []}, "MISSING", [], id="no-associated-tests"),
     ],
 )
-def test_matching_requirement_reports_are_accepted(requirement, status, expected_tests):
+def test_matching_requirement_reports_are_accepted(
+    requirement: Mapping[str, object], status: str, expected_tests: list[tuple[str, str]]
+) -> None:
     expectation = expected(requirement)
 
     matches = expectation.to_have(status=status, tests=expected_tests)
@@ -120,7 +123,9 @@ def test_matching_requirement_reports_are_accepted(requirement, status, expected
         ),
     ],
 )
-def test_incorrect_or_incomplete_requirement_reports_are_rejected(requirement):
+def test_incorrect_or_incomplete_requirement_reports_are_rejected(
+    requirement: Mapping[str, object],
+) -> None:
     expectation = expected(requirement)
     expected_tests = [
         ("test_behavior.py::test_first", "PASSED"),
@@ -139,7 +144,9 @@ def test_incorrect_or_incomplete_requirement_reports_are_rejected(requirement):
         pytest.param("PASSED", "test_behavior.py::test_other", id="wrong-identity"),
     ],
 )
-def test_checking_a_requirement_does_not_modify_the_report(actual_status, actual_nodeid):
+def test_checking_a_requirement_does_not_modify_the_report(
+    actual_status: str, actual_nodeid: str
+) -> None:
     requirement = {
         "status": actual_status,
         "tests": [{"nodeid": actual_nodeid, "outcome": "PASSED"}],

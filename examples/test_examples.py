@@ -34,7 +34,9 @@ def example_project(
     return copy
 
 
-def test_quickstart_verifies_the_pizza(example_project):
+def test_quickstart_verifies_the_pizza(
+    example_project: Callable[[ModuleType], pytest.Pytester],
+) -> None:
     project = example_project(quickstart)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -58,7 +60,9 @@ def test_quickstart_verifies_the_pizza(example_project):
     result.stdout.fnmatch_lines(["*REQ-001*PASSED*", "*Coverage:*100.0%*"])
 
 
-def test_missing_requirement_reports_the_other_sock(example_project):
+def test_missing_requirement_reports_the_other_sock(
+    example_project: Callable[[ModuleType], pytest.Pytester],
+) -> None:
     project = example_project(missing_requirement)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -80,7 +84,9 @@ def test_missing_requirement_reports_the_other_sock(example_project):
     result.stdout.fnmatch_lines(["*REQ-002*MISSING*", "*Coverage:*50.0%*"])
 
 
-def test_partial_verification_keeps_the_cat_unverified(example_project):
+def test_partial_verification_keeps_the_cat_unverified(
+    example_project: Callable[[ModuleType], pytest.Pytester],
+) -> None:
     project = example_project(partial_verification)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -102,7 +108,9 @@ def test_partial_verification_keeps_the_cat_unverified(example_project):
     result.stdout.fnmatch_lines(["*REQ-001*SKIPPED*", "*Coverage:*0.0%*"])
 
 
-def test_acceptance_only_verifies_the_duck_without_the_moon_test(example_project):
+def test_acceptance_only_verifies_the_duck_without_the_moon_test(
+    example_project: Callable[[ModuleType], pytest.Pytester],
+) -> None:
     project = example_project(acceptance_only)
 
     result = project.runpytest_subprocess(
@@ -122,7 +130,9 @@ def test_acceptance_only_verifies_the_duck_without_the_moon_test(example_project
     assert report["summary"]["coverage"] == 100.0
 
 
-def test_plain_pytest_in_acceptance_only_still_fails_the_moon_test(example_project):
+def test_plain_pytest_in_acceptance_only_still_fails_the_moon_test(
+    example_project: Callable[[ModuleType], pytest.Pytester],
+) -> None:
     project = example_project(acceptance_only)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")

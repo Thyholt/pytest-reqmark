@@ -15,9 +15,12 @@ from tests.acceptance.scenarios.configuration import (
     zero_requirements_without_configuration,
 )
 from tests.acceptance.scenarios.requirements import invalid_inventory
+from tests.acceptance.types import FileProject, ReadReport
 
 
-def test_requirements_can_be_declared_in_pyproject_toml(file_project, read_report):
+def test_requirements_can_be_declared_in_pyproject_toml(
+    file_project: FileProject, read_report: ReadReport
+) -> None:
     project = file_project(pyproject_with_pytest_ini)
     project.makefile(".toml", pyproject='[tool.xspec]\nrequirements = ["REQ-001", "REQ-002"]\n')
 
@@ -35,7 +38,9 @@ def test_requirements_can_be_declared_in_pyproject_toml(file_project, read_repor
     }
 
 
-def test_requirements_can_be_declared_in_pytest_ini(file_project, read_report):
+def test_requirements_can_be_declared_in_pytest_ini(
+    file_project: FileProject, read_report: ReadReport
+) -> None:
     project = file_project(pytest_ini_inventory)
     project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-001\n    REQ-002\n")
 
@@ -48,8 +53,8 @@ def test_requirements_can_be_declared_in_pytest_ini(file_project, read_report):
 
 
 def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
-    file_project, read_report
-):
+    file_project: FileProject, read_report: ReadReport
+) -> None:
     project = file_project(pyproject_with_pytest_ini)
     project.makefile(".toml", pyproject='[tool.xspec]\nrequirements = ["REQ-001"]\n')
     project.makefile(".ini", pytest="[pytest]\naddopts = -q\n")
@@ -61,7 +66,9 @@ def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
     assert report["requirements"]["REQ-001"]["status"] == "PASSED"
 
 
-def test_declaring_an_inventory_in_both_supported_files_is_rejected(file_project):
+def test_declaring_an_inventory_in_both_supported_files_is_rejected(
+    file_project: FileProject,
+) -> None:
     project = file_project(conflicting_inventories)
     project.makefile(".toml", pyproject='[tool.xspec]\nrequirements = ["REQ-001"]\n')
     project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-002\n")
@@ -84,8 +91,8 @@ def test_declaring_an_inventory_in_both_supported_files_is_rejected(file_project
     ],
 )
 def test_other_configuration_files_do_not_supply_a_requirement_inventory(
-    file_project, filename, content
-):
+    file_project: FileProject, filename: str, content: str
+) -> None:
     project = file_project(unsupported_inventory)
     (project.path / filename).write_text(content, encoding="utf-8")
 
@@ -96,7 +103,9 @@ def test_other_configuration_files_do_not_supply_a_requirement_inventory(
     assert "REQ-001" in message
 
 
-def test_normal_pytest_without_requirement_configuration_still_works(file_project):
+def test_normal_pytest_without_requirement_configuration_still_works(
+    file_project: FileProject,
+) -> None:
     project = file_project(without_requirement_configuration)
 
     result = project.runpytest_subprocess()
@@ -106,8 +115,8 @@ def test_normal_pytest_without_requirement_configuration_still_works(file_projec
 
 
 def test_no_requirement_configuration_means_success_with_zero_requirements(
-    file_project, read_report
-):
+    file_project: FileProject, read_report: ReadReport
+) -> None:
     project = file_project(zero_requirements_without_configuration)
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
@@ -127,7 +136,7 @@ def test_no_requirement_configuration_means_success_with_zero_requirements(
     }
 
 
-def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(file_project):
+def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(file_project: FileProject) -> None:
     project = file_project(duplicate_ini_ids)
     project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-001\n    REQ-001\n")
 
@@ -141,8 +150,8 @@ def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(file_project):
 
 @pytest.mark.parametrize("config_file", ["pyproject.toml", "pytest.ini", None])
 def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
-    file_project, config_file
-):
+    file_project: FileProject, config_file: str | None
+) -> None:
     project = file_project(unknown_id_without_inventory)
     if config_file == "pyproject.toml":
         project.makefile(".toml", pyproject="[tool.xspec]\nrequirements = []\n")
@@ -168,8 +177,8 @@ def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
     ],
 )
 def test_unsupported_inventory_files_are_ignored_when_tests_are_unmarked(
-    file_project, read_report, filename, content
-):
+    file_project: FileProject, read_report: ReadReport, filename: str, content: str
+) -> None:
     project = file_project(unmarked_with_unsupported_inventory)
     (project.path / filename).write_text(content, encoding="utf-8")
 
@@ -193,8 +202,8 @@ def test_unsupported_inventory_files_are_ignored_when_tests_are_unmarked(
 
 @pytest.mark.parametrize("config_file", ["pyproject.toml", "pytest.ini"])
 def test_an_empty_file_inventory_reports_success_with_zero_requirements(
-    file_project, read_report, config_file
-):
+    file_project: FileProject, read_report: ReadReport, config_file: str | None
+) -> None:
     project = file_project(zero_requirements_without_configuration)
     if config_file == "pyproject.toml":
         project.makefile(".toml", pyproject="[tool.xspec]\nrequirements = []\n")
@@ -234,7 +243,9 @@ def test_an_empty_file_inventory_reports_success_with_zero_requirements(
         ),
     ],
 )
-def test_invalid_configuration_structure_is_rejected(file_project, content, diagnostic):
+def test_invalid_configuration_structure_is_rejected(
+    file_project: FileProject, content: str, diagnostic: str
+) -> None:
     project = file_project(invalid_inventory)
     project.makefile(".ini", pytest="[pytest]\n")
     project.makefile(".toml", pyproject=content)
@@ -247,7 +258,9 @@ def test_invalid_configuration_structure_is_rejected(file_project, content, diag
 
 
 @pytest.mark.parametrize("inventory", ['"REQ-001"', "[123]", '["REQ-001", "REQ-001"]'])
-def test_invalid_requirement_inventory_is_rejected(file_project, inventory):
+def test_invalid_requirement_inventory_is_rejected(
+    file_project: FileProject, inventory: str
+) -> None:
     project = file_project(invalid_inventory)
     project.makefile(".toml", pyproject=f"[tool.xspec]\nrequirements = {inventory}\n")
 
