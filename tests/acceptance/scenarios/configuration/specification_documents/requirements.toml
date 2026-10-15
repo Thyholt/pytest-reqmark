@@ -1,0 +1,13 @@
+owner = "Document owner"
+
+[[requirements]]
+id = "REQ-002"
+description = "Description from the document."
+rationale = """
+Rationale from the document.
+It can span several lines.
+"""
+priority = 1
+
+[[requirements]]
+id = "REQ-001"

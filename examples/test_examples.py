@@ -8,7 +8,13 @@ from types import ModuleType
 
 import pytest
 
-from examples import acceptance_only, missing_requirement, partial_verification, quickstart
+from examples import (
+    acceptance_only,
+    missing_requirement,
+    partial_verification,
+    quickstart,
+    specification_document,
+)
 
 pytest_plugins = ["pytester"]
 
@@ -58,6 +64,45 @@ def test_quickstart_verifies_the_pizza(
     assert report["summary"]["verified"] is True
     assert report["summary"]["coverage"] == 100.0
     result.stdout.fnmatch_lines(["*REQ-001*PASSED*", "*Coverage:*100.0%*"])
+
+
+def test_specification_document_verifies_the_addition_requirements(
+    example_project: Callable[[ModuleType], pytest.Pytester],
+) -> None:
+    project = example_project(specification_document)
+
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
+
+    assert result.ret == pytest.ExitCode.OK
+    result.assert_outcomes(passed=2)
+    report = json.loads((project.path / "report.json").read_text(encoding="utf-8"))
+    assert report["requirements"] == {
+        "REQ-001": {
+            "status": "PASSED",
+            "tests": [
+                {
+                    "nodeid": "test_behavior.py::test_adding_two_integers_returns_their_sum",
+                    "outcome": "PASSED",
+                },
+                {
+                    "nodeid": "test_behavior.py::test_adding_zero_preserves_the_value",
+                    "outcome": "PASSED",
+                },
+            ],
+        },
+        "REQ-002": {
+            "status": "PASSED",
+            "tests": [
+                {
+                    "nodeid": "test_behavior.py::test_adding_zero_preserves_the_value",
+                    "outcome": "PASSED",
+                },
+            ],
+        },
+    }
+    assert report["summary"]["verified"] is True
+    assert report["summary"]["coverage"] == 100.0
+    result.stdout.fnmatch_lines(["*REQ-001*PASSED*2*", "*REQ-002*PASSED*1*"])
 
 
 def test_missing_requirement_reports_the_other_sock(

@@ -1,0 +1,2 @@
+[tool.xspec]
+requirements = ["REQ-001"]

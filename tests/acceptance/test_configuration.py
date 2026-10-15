@@ -1,4 +1,7 @@
-"""Users configure their inventory in pyproject.toml or pytest.ini only."""
+"""Explicit inventories take precedence over the optional specification document."""
+
+from pathlib import Path
+from shutil import copyfile
 
 import pytest
 
@@ -8,6 +11,7 @@ from tests.acceptance.scenarios.configuration import (
     duplicate_ini_ids,
     pyproject_with_pytest_ini,
     pytest_ini_inventory,
+    specification_documents,
     unknown_id_without_inventory,
     unmarked_with_unsupported_inventory,
     unsupported_inventory,
@@ -16,6 +20,8 @@ from tests.acceptance.scenarios.configuration import (
 )
 from tests.acceptance.scenarios.requirements import invalid_inventory
 from tests.acceptance.types import FileProject, ReadReport
+
+DOCUMENTS = Path(specification_documents.__path__[0])
 
 
 def test_requirements_can_be_declared_in_pyproject_toml(
@@ -72,6 +78,7 @@ def test_declaring_an_inventory_in_both_supported_files_is_rejected(
     project = file_project(conflicting_inventories)
     project.makefile(".toml", pyproject='[tool.xspec]\nrequirements = ["REQ-001"]\n')
     project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-002\n")
+    copyfile(DOCUMENTS / "one_requirement.toml", project.path / "xspec.toml")
 
     result = project.runpytest_subprocess("--xspec-report")
 
@@ -205,6 +212,7 @@ def test_an_empty_file_inventory_reports_success_with_zero_requirements(
     file_project: FileProject, read_report: ReadReport, config_file: str | None
 ) -> None:
     project = file_project(zero_requirements_without_configuration)
+    copyfile(DOCUMENTS / "other_requirements.toml", project.path / "xspec.toml")
     if config_file == "pyproject.toml":
         project.makefile(".toml", pyproject="[tool.xspec]\nrequirements = []\n")
     else:
@@ -249,6 +257,7 @@ def test_invalid_configuration_structure_is_rejected(
     project = file_project(invalid_inventory)
     project.makefile(".ini", pytest="[pytest]\n")
     project.makefile(".toml", pyproject=content)
+    copyfile(DOCUMENTS / "one_requirement.toml", project.path / "xspec.toml")
 
     result = project.runpytest_subprocess("-c", "pytest.ini", "--xspec-report")
 
@@ -263,6 +272,7 @@ def test_invalid_requirement_inventory_is_rejected(
 ) -> None:
     project = file_project(invalid_inventory)
     project.makefile(".toml", pyproject=f"[tool.xspec]\nrequirements = {inventory}\n")
+    copyfile(DOCUMENTS / "one_requirement.toml", project.path / "xspec.toml")
 
     result = project.runpytest_subprocess("--xspec-report")
 

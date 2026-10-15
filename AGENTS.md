@@ -238,7 +238,8 @@ behavior tests with skips or xfails.
 
 ### Project conventions and agreed workflow
 
-- Write user-facing, behavior-focused acceptance tests that a junior developer can read.
+- Write user-facing acceptance tests for human review, readable by a junior developer.
+  Cover internal implementation details and exhaustive validation combinations in agent-owned unit tests.
 - Obtain the user's explicit ok to the acceptance tests before plugin implementation.
 - After approval, use red-green-refactor and choose meaningful unit tests as needed.
 - Assert public outcomes through real pytest runs; avoid coupling acceptance tests to internals.
@@ -247,7 +248,8 @@ behavior tests with skips or xfails.
 - Keep unit tests independent of the filesystem where possible, testing validation directly.
   Cover file parsing and loading in acceptance tests.
 - Preserve the specification and accepted user corrections as the behavioral contract.
-- Support requirement configuration only in `pyproject.toml` or `pytest.ini`.
+- Support requirement inventories in `pyproject.toml` or `pytest.ini`, with `xspec.toml`
+  as a fallback only when neither declares an inventory.
 - Zero declared requirements means acceptance success with zero requirements.
 - Acceptance verification ignores unmarked test outcomes; ordinary pytest exit behavior remains.
 - Python style follows ruff: Python 3.10 target, 100-character lines and sorted imports.
@@ -288,6 +290,8 @@ underlying issue goes away (model upgrades, refactors, process changes).
   explicitly instead of marking superseded criteria as implemented.
 - Keep `tasks/plan.md` and `tasks/todo.md` local and out of commits.
 - Keep README guidance focused on what users learn from runnable public examples.
+  Present its motivation as one connected argument through engineering principles,
+  without naming specific development methods.
   For terminology edits, preserve its structure, examples and public configuration keys.
   Run example commands from the repository root, without `cd` or `--project`.
   Document the shared command once, and explain only the options that differ.
@@ -324,6 +328,12 @@ underlying issue goes away (model upgrades, refactors, process changes).
   Reporting-format tests retain literal JSON expectations.
   Inline requirement and summary lookups in assertions instead of introducing
   aliases for report sections.
+- Store acceptance TOML test data in lintable `.toml` files, with deliberately malformed
+  syntax in `.toml.invalid` files, and copy them into isolated user projects.
+- Keep acceptance tests within the agreed scope; do not add tests for deferred features
+  or tests that freeze their current absence.
+- Use `pyproject.toml` for pytest settings in new demos unless they specifically demonstrate
+  `pytest.ini` configuration.
 - Refer to scenarios through package imports, not string paths; use their package
   search paths when copying. Within scenarios, add empty `__init__.py` files only
   in referenced leaf folders to give editor navigation a concrete target.
