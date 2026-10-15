@@ -17,17 +17,11 @@ Create a branch for your change.
 
 ## Make a change
 
-For a bug fix, first add a test that reproduces it. For new behavior, agree on the
-acceptance tests before changing the plugin. Make the test pass, then simplify.
+Follow the [development and testing conventions](AGENTS.md#project-conventions-and-agreed-workflow).
 
 Use the existing [acceptance tests](tests/acceptance) as a starting point for changes
 users can observe. They run real pytest commands in isolated projects to keep
 repository configuration out of each run. Use [unit tests](tests/unit) for focused logic.
-
-Keep unit tests independent of the filesystem where possible, testing inventory validation
-directly with Python values. File parsing and loading are covered by the acceptance tests.
-Acceptance-test configuration also includes pytest settings such as marker registration.
-Put those settings in real configuration files alongside the requirement inventory.
 
 Run the relevant test file while working:
 
@@ -37,8 +31,6 @@ uv run --locked pytest tests/acceptance/test_configuration.py -n 0
 
 Replace the path with the file you are changing. `-n 0` runs tests serially,
 which makes debugging easier.
-
-Update the usage documentation when users need to do something differently.
 
 ## Check your work
 
