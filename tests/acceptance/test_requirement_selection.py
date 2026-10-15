@@ -182,6 +182,26 @@ def test_terminal_and_json_describe_the_same_selection_scope(
         assert line in result.stdout.lines
 
 
+def test_report_scope_preserves_configured_collection_paths(
+    user_project: UserProject, read_report: ReadReport
+) -> None:
+    project = user_project(["REQ-003", "REQ-004"], requirement_selection)
+    project.makefile(".ini", pytest="[pytest]\ntestpaths = test_inherited.py\n")
+
+    result = project.runpytest_subprocess("--xspec-select=REQ-004", "--xspec-json=report.json")
+
+    assert result.ret == pytest.ExitCode.OK
+    result.assert_outcomes(passed=2, deselected=1)
+    report = read_report(project)
+    assert report.get("scope") == {
+        "selected_requirements": ["REQ-004"],
+        "collection_paths": ["test_inherited.py"],
+        "keyword_expression": "",
+        "marker_expression": "",
+        "collect_only": False,
+    }
+
+
 @pytest.mark.parametrize("strict", [False, True], ids=["ordinary", "strict"])
 @pytest.mark.parametrize(
     ("options", "outcome", "expected_exit"),
