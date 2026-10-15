@@ -2,5 +2,5 @@ import pytest
 
 
 @pytest.mark.xspec("REQ-001")
-def test_other():
+def test_other() -> None:
     pass

@@ -2,5 +2,5 @@ import pytest
 
 
 @pytest.mark.xspec("REQ-001")
-def test_behavior():
+def test_behavior() -> None:
     assert 1 == 2, "the text [XPASS(strict)] is not an unexpected pass"

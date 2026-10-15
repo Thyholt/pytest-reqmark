@@ -1,2 +1,2 @@
-def test_unmarked():
+def test_unmarked() -> None:
     pass
