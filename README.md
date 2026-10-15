@@ -299,7 +299,8 @@ This README was written by AI.
 
 ## Contributing
 
-See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
+Bring difficult, realistic examples of executable specification or feedback problems.
+See [CONTRIBUTING.md][contributing] for proposing changes, setup, tests and pull requests.
 
 [acceptance-only]: https://github.com/Thyholt/pytest-xspec/tree/master/examples/acceptance_only
 [pizza]: https://github.com/Thyholt/pytest-xspec/blob/master/examples/quickstart/test_behavior.py

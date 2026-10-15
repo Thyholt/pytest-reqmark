@@ -43,8 +43,8 @@ These rules override everything else in this file when in conflict:
   you'd do it differently in a greenfield repo.
 - Surface assumptions out loud: "I'm assuming you want X, Y, Z. If that's wrong, say so." Do not
   bury assumptions inside the implementation.
-- If two approaches exist, present both with tradeoffs. Do not pick one silently. Exception: trivial
-  tasks (typo, rename, log line) where the diff fits in one sentence.
+- Decide implementation details and architecture as the agent. Explain consequential tradeoffs.
+  Collaborate with humans to decide intended behavior.
 
 ---
 
@@ -238,6 +238,11 @@ behavior tests with skips or xfails.
 
 ### Project conventions and agreed workflow
 
+- Follow [CONTRIBUTING.md](CONTRIBUTING.md): substantial changes need runnable, realistic examples
+  of hard executable specification or feedback problems. Show expected results and general value.
+  For bugs, require a minimal reproduction, the command, and expected and actual results.
+- Let examples challenge existing assumptions. Prefer one coherent approach, and replace an inferior
+  design when evidence justifies it, including breaking changes with clear migration guidance.
 - Write user-facing acceptance tests for human review, readable by a junior developer.
   Cover internal implementation details and exhaustive validation combinations in agent-owned unit tests.
 - Obtain the user's explicit ok to the acceptance tests before plugin implementation.
@@ -300,7 +305,7 @@ underlying issue goes away (model upgrades, refactors, process changes).
   Keep the acceptance contract and acceptance scenarios internal. Document package
   initializer and editor-navigation conventions in developer instructions.
 - Keep coding and testing rules in AGENTS.md. Keep contributor setup and workflow
-  in CONTRIBUTING.md, linked from README, and link to AGENTS.md for those rules.
+  in CONTRIBUTING.md, linked from README. Do not require contributors to read AGENTS.md.
   Link to tool and CI configuration instead of repeating their settings and checks.
 - Use commas and full stops in README prose, never semicolons or dashes.
   Use colons between example names and captions. Keep table outcomes short.

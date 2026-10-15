@@ -1,8 +1,37 @@
 # Contributing
 
-For a bug report, include a small example, the command you ran, and the expected
-and actual results.
-Discuss changes to public behavior before implementing them.
+pytest-xspec aims to do one thing exceptionally well: executable specifications and feedback. It
+connects requirements to tests and reports their results.
+
+The goal is not to accumulate features, but to solve increasingly difficult problems in executable
+specifications and feedback exceptionally well.
+
+## Proposing changes
+
+Development is driven by problems, not feature requests.
+
+Contributors should bring difficult, realistic examples that challenge pytest-xspec. Proposals
+should demonstrate:
+
+- The problem: A concrete challenge involving executable specifications or feedback.
+- The example: Requirements, tests, and expected results that make the problem reproducible and
+  verifiable.
+- The value: Why solving the problem matters beyond the example itself.
+
+Examples should challenge the library's assumptions, not accommodate its existing design.
+
+For bugs, provide a minimal reproduction, the command executed, and the expected and actual results.
+
+## Architecture follows evidence
+
+pytest-xspec favors one excellent way of doing things over multiple competing approaches.
+
+No API, configuration format, or architectural decision is permanent. When a convincing example
+demonstrates a better general approach, pytest-xspec should adopt it, even if that requires breaking
+changes.
+
+Backward compatibility must not preserve an inferior design. Users who prefer an earlier approach
+can continue using or fork a previous major release.
 
 ## Get started
 
@@ -12,16 +41,14 @@ With uv installed, clone the repository and run this from the repository root:
 uv run --locked prek install
 ```
 
-This prepares the development environment and installs checks that run before commits.
-Create a branch for your change.
+This prepares the development environment and installs checks that run before commits. Create a
+branch for your change.
 
 ## Make a change
 
-Follow the [development and testing conventions](AGENTS.md#project-conventions-and-agreed-workflow).
-
-Use the existing [acceptance tests](tests/acceptance) as a starting point for changes
-users can observe. They run real pytest commands in isolated projects to keep
-repository configuration out of each run. Use [unit tests](tests/unit) for focused logic.
+Use the existing [acceptance tests](tests/acceptance) as a starting point for changes users can
+observe. They run real pytest commands in isolated projects to keep repository configuration out of
+each run. Use [unit tests](tests/unit) for focused logic.
 
 Run the relevant test file while working:
 
@@ -29,8 +56,8 @@ Run the relevant test file while working:
 uv run --locked pytest tests/acceptance/test_configuration.py -n 0
 ```
 
-Replace the path with the file you are changing. `-n 0` runs tests serially,
-which makes debugging easier.
+Replace the path with the file you are changing. `-n 0` runs tests serially, which makes debugging
+easier.
 
 ## Check your work
 
@@ -46,30 +73,24 @@ Run the full test suite:
 uv run --locked pytest
 ```
 
-Measure line and branch coverage, including the acceptance scenarios' pytest subprocesses:
+Measure line and branch coverage, including acceptance test subprocesses:
 
 ```sh
 uv run --locked pytest --cov --cov-report=term-missing --cov-report=xml
 ```
 
-Coverage settings live in `pyproject.toml`. The subprocess patch collects execution
-inside the isolated user projects; pytest-cov combines their results with the main
-suite and xdist workers. The terminal shows missing lines and branches, and
-`coverage.xml` contains the machine-readable report uploaded to Codecov by CI.
-This measures the plugin's code, independently of the requirement verification
-coverage shown in its reports. No minimum percentage is enforced initially.
+Coverage settings live in `pyproject.toml`. Results are reported in the terminal and `coverage.xml`.
+No minimum coverage percentage is enforced.
 
-Fix reported problems before submitting. Check definitions live in
-[prek.toml](prek.toml), tool settings in [pyproject.toml](pyproject.toml), and
-CI jobs in [.github/workflows](.github/workflows).
+Fix reported problems before submitting. Check definitions live in `prek.toml`, tool settings in
+`pyproject.toml`, and CI jobs in [`.github/workflows`](.github/workflows).
 
 ## Open a pull request
 
-Keep each pull request focused on one change. Explain the problem, what users
-will experience, and how you verified it. Include a regression test for bug fixes.
+Keep each pull request focused on one change. Explain the problem, what users will experience, and
+how you verified it. Include a regression test for bug fixes.
 
-Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/),
-for example `docs: clarify requirement reporting`.
-Wait for CI and review before merging.
+Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), for example `docs:
+clarify requirement reporting`. Wait for CI and review before merging.
 
-Maintainers can follow [the release guide](docs/releasing.md) to publish a version.
+Maintainers can follow the [release guide](docs/releasing.md) to publish a version.
