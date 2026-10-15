@@ -20,6 +20,11 @@ should demonstrate:
 
 Examples should challenge the library's assumptions, not accommodate its existing design.
 
+Challenging examples are living references, not fixed implementation plans. Large problems should be
+broken into coherent, verifiable increments, each delivering meaningful progress. Examples may evolve
+as understanding improves, but must never be simplified merely to accommodate the existing
+implementation.
+
 For bugs, provide a minimal reproduction, the command executed, and the expected and actual results.
 
 ## Architecture follows evidence
