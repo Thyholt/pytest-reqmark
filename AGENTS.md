@@ -238,7 +238,8 @@ behavior tests with skips or xfails.
 
 ### Project conventions and agreed workflow
 
-- Write user-facing, behavior-focused acceptance tests that a junior developer can read.
+- Write user-facing acceptance tests for human review, readable by a junior developer.
+  Cover internal implementation details and exhaustive validation combinations in agent-owned unit tests.
 - Obtain the user's explicit ok to the acceptance tests before plugin implementation.
 - After approval, use red-green-refactor and choose meaningful unit tests as needed.
 - Assert public outcomes through real pytest runs; avoid coupling acceptance tests to internals.
@@ -320,6 +321,12 @@ underlying issue goes away (model upgrades, refactors, process changes).
   Reporting-format tests retain literal JSON expectations.
   Inline requirement and summary lookups in assertions instead of introducing
   aliases for report sections.
+- Store acceptance TOML test data in lintable `.toml` files, with deliberately malformed
+  syntax in `.toml.invalid` files, and copy them into isolated user projects.
+- Keep acceptance tests within the agreed scope; do not add tests for deferred features
+  or tests that freeze their current absence.
+- Use `pyproject.toml` for pytest settings in new demos unless they specifically demonstrate
+  `pytest.ini` configuration.
 - Refer to scenarios through package imports, not string paths; use their package
   search paths when copying. Within scenarios, add empty `__init__.py` files only
   in referenced leaf folders to give editor navigation a concrete target.
