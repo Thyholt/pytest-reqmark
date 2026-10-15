@@ -1,28 +1,18 @@
 # Contributing
 
-Humans read acceptance tests and collaborate with AI agents to decide intended behavior.
-Agents investigate solutions, decide implementation details and architecture, write the code
-and unit tests, and demonstrate the results. Contributors can bring a problem without
-designing the implementation.
+Humans and agents decide intended behavior together. Agents choose implementation details.
 
-## Bring a problem and a proof case
+## Bring a problem
 
-For a bug report, include a small runnable reproduction, the command you ran, and the expected
-and actual results. For a substantial behavior change, bring a proof case: a runnable example
-of a hard testing or specification problem that demonstrates why a change is needed.
+For a bug, provide a small runnable reproduction, the command, and expected and actual results.
+For a substantial change, bring a runnable example of a hard testing or specification problem:
 
-Include:
+- Show the workflow, specifications, tests and required execution contexts.
+- Demonstrate the current limitation and expected results.
+- Include a negative case that must not pass, such as missing required evidence.
 
-- A concrete user workflow and the verification question it must answer.
-- Specifications, executable tests and the execution contexts the problem requires.
-- Commands showing the current limitation and the expected evidence.
-- A negative case that must not be reported as success, such as missing required evidence.
-- The boundary between the example's domain responsibilities and pytest-xspec's general role.
-
-An issue can begin with a problem report or research question. Humans and agents can develop
-the proof case together. Before accepting a substantial change, agents require a working
-example that can expose an incorrect result. A proposed flag, file format or hook alone
-does not establish the need.
+You can start with a question and develop the example with an agent. You do not need to design
+an API or implementation. The example must show why a change is needed.
 
 ## Get started
 
@@ -39,18 +29,13 @@ Create a branch for your change.
 
 Follow the [development and testing conventions](AGENTS.md#project-conventions-and-agreed-workflow).
 
-Humans and agents collaborate to decide intended public behavior. Agents first turn the proof
-case into readable acceptance tests. Humans review whether the example is realistic, whether
-the expected results are correct and whether the negative case catches false success.
-Obtain explicit human approval of the
-acceptance tests before plugin implementation. Agents then choose the design and implement
-the smallest general solution using red-green-refactor. They demonstrate the example before
-and after the change, including negative outcomes. A passing suite alone is insufficient.
+Agents write acceptance tests first. Humans review the example and expected outcomes,
+then explicitly approve the tests before implementation. Agents implement and demonstrate
+both successful and negative outcomes. Keep domain-specific concepts in examples.
 
-Prefer one coherent workflow. A stronger proof case can justify replacing an existing approach
-and breaking compatibility when humans agree to the changed behavior. Explain what the change
-solves and simplifies, provide migration notes, and make breaking changes in a major release.
-Keep domain-specific concepts in the example rather than building them into the plugin.
+Prefer one coherent workflow. A stronger example may justify replacing an approach and breaking
+compatibility, with human agreement on behavior. Explain why, provide migration notes and use
+a major release.
 
 Use the existing [acceptance tests](tests/acceptance) as a starting point for changes
 users can observe. They run real pytest commands in isolated projects to keep
