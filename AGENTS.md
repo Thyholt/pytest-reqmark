@@ -43,8 +43,8 @@ These rules override everything else in this file when in conflict:
   you'd do it differently in a greenfield repo.
 - Surface assumptions out loud: "I'm assuming you want X, Y, Z. If that's wrong, say so." Do not
   bury assumptions inside the implementation.
-- If two approaches exist, present both with tradeoffs. Do not pick one silently. Exception: trivial
-  tasks (typo, rename, log line) where the diff fits in one sentence.
+- Decide implementation details and architecture as the agent. Investigate alternatives and explain
+  consequential tradeoffs. Ask humans to resolve intended behavior, not to choose internal designs.
 
 ---
 
@@ -164,7 +164,7 @@ For every task:
 **Ask before proceeding when:**
 
 - The request has two plausible interpretations and the choice materially affects the output.
-- The change touches something you've been told is load-bearing, versioned, or has a migration path.
+- The change would alter agreed public behavior or compatibility beyond the approved scope.
 - You need a credential, a secret, or a production resource you don't have access to.
 - The user's stated goal and the literal request appear to conflict.
 
@@ -238,10 +238,25 @@ behavior tests with skips or xfails.
 
 ### Project conventions and agreed workflow
 
-- Write user-facing acceptance tests for human review, readable by a junior developer.
+- Humans read acceptance tests and collaborate with agents to decide intended behavior.
+  Agents decide implementation details and architecture, and own source code and unit tests.
+- Require a concrete, runnable proof case before substantial public behavior changes.
+  Start with a hard testing or specification problem, rather than a proposed feature or API.
+  For ordinary bugs, a small reproduction with expected and actual results is sufficient.
+- Establish the user's workflow, specifications, tests and relevant execution contexts.
+  Demonstrate the current limitation and expected evidence, including a negative case that must
+  not be reported as success. Keep domain responsibilities separate from the plugin's general role.
+- Agents write user-facing acceptance tests first for human review, readable by a junior developer.
   Cover internal implementation details and exhaustive validation combinations in agent-owned unit tests.
 - Obtain the user's explicit ok to the acceptance tests before plugin implementation.
+  Human review checks intended outcomes, the realism of the example and whether tests can expose
+  incorrect success. A passing agent-written suite alone does not establish useful verification.
 - After approval, use red-green-refactor and choose meaningful unit tests as needed.
+- Demonstrate the proof case through public behavior before and after the change, including
+  negative outcomes. Implement the smallest general solution without hard-coding the example.
+- Prefer one coherent workflow. A stronger proof case can justify replacing an existing approach
+  and breaking compatibility when humans agree to the changed behavior. Explain the evidence,
+  simplification and migration in the change, and use a major release for breaking changes.
 - Assert public outcomes through real pytest runs; avoid coupling acceptance tests to internals.
 - Acceptance tests run isolated user projects, with common setup in fixtures.
   Use real supported configuration files, including pytest settings such as marker registration.
