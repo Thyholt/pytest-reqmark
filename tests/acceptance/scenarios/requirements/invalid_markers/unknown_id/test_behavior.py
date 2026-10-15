@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.tracereq("UNKNOWN")
+@pytest.mark.xspec("UNKNOWN")
 def test_behavior():
     pass

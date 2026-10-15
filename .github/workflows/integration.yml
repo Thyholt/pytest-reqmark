@@ -45,17 +45,17 @@ jobs:
           /tmp/acceptance-integration/bin/python - <<'PY'
           from importlib.metadata import distribution
 
-          import pytest_tracereq
+          import pytest_xspec
 
-          package = distribution("pytest-tracereq")
-          assert package.metadata["Name"] == "pytest-tracereq"
+          package = distribution("pytest-xspec")
+          assert package.metadata["Name"] == "pytest-xspec"
           entry_points = [entry for entry in package.entry_points if entry.group == "pytest11"]
           assert len(entry_points) == 1
-          assert entry_points[0].name == "tracereq"
-          assert entry_points[0].value == "pytest_tracereq.plugin"
+          assert entry_points[0].name == "xspec"
+          assert entry_points[0].value == "pytest_xspec.plugin"
           entry_points[0].load()
           print(f"Installed {package.metadata['Name']} {package.version}:")
-          print(pytest_tracereq.__file__)
+          print(pytest_xspec.__file__)
           PY
 
       - name: Verify acceptance and public examples against the installed wheel

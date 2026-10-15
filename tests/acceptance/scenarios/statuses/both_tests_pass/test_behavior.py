@@ -1,11 +1,11 @@
 import pytest
 
 
-@pytest.mark.tracereq("REQ-001")
+@pytest.mark.xspec("REQ-001")
 def test_first():
     pass
 
 
-@pytest.mark.tracereq("REQ-001")
+@pytest.mark.xspec("REQ-001")
 def test_second():
     pass

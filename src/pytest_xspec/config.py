@@ -17,10 +17,10 @@ def load_requirements(config: pytest.Config) -> list[str]:
             # pytest supplies tomli on Python 3.10; newer Python supplies tomllib.
             toml = import_module("tomllib" if sys.version_info >= (3, 11) else "tomli")
             with pyproject.open("rb") as stream:
-                section = toml.load(stream).get("tool", {}).get("tracereq", {})
+                section = toml.load(stream).get("tool", {}).get("xspec", {})
 
             if not isinstance(section, dict):
-                raise pytest.UsageError("pyproject.toml: tracereq must be a table")
+                raise pytest.UsageError("pyproject.toml: xspec must be a table")
 
             if "requirements" in section:
                 inventories[pyproject.name] = section["requirements"]
@@ -29,14 +29,14 @@ def load_requirements(config: pytest.Config) -> list[str]:
             parser = configparser.ConfigParser(interpolation=None)
             parser.read(ini, encoding="utf-8")
 
-            if parser.has_option("pytest", "tracereq"):
+            if parser.has_option("pytest", "xspec"):
                 inventories[ini.name] = [
                     line.strip()
-                    for line in parser.get("pytest", "tracereq").splitlines()
+                    for line in parser.get("pytest", "xspec").splitlines()
                     if line.strip()
                 ]
     except (OSError, ValueError, configparser.Error) as error:
-        raise pytest.UsageError(f"Cannot read tracereq requirements: {error}") from error
+        raise pytest.UsageError(f"Cannot read xspec requirements: {error}") from error
 
     if len(inventories) > 1:
         raise pytest.UsageError("Declare requirements in only one of pyproject.toml and pytest.ini")

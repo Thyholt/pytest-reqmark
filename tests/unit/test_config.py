@@ -5,20 +5,20 @@ from unittest.mock import Mock
 
 import pytest
 
-from pytest_tracereq.config import load_requirements
+from pytest_xspec.config import load_requirements
 
 
 @pytest.mark.parametrize(
     ("content", "diagnostic"),
     [
         pytest.param(
-            '[tool]\ntracereq = ["REQ-001"]\n',
-            "pyproject.toml: tracereq must be a table",
+            '[tool]\nxspec = ["REQ-001"]\n',
+            "pyproject.toml: xspec must be a table",
             id="non-table-section",
         ),
         pytest.param(
-            "[tool.tracereq\n",
-            "Cannot read tracereq requirements:",
+            "[tool.xspec\n",
+            "Cannot read xspec requirements:",
             id="malformed-toml",
         ),
     ],

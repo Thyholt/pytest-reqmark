@@ -34,7 +34,7 @@ jobs:
           import os
           from importlib.metadata import version
 
-          expected_tag = f"v{version('pytest-tracereq')}"
+          expected_tag = f"v{version('pytest-xspec')}"
           assert os.environ["RELEASE_TAG"] == expected_tag, expected_tag
           PY
           git merge-base --is-ancestor HEAD origin/master
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/pytest-tracereq/
+      url: https://pypi.org/project/pytest-xspec/
     permissions:
       id-token: write
 

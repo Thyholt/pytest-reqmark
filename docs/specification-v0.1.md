@@ -1,4 +1,4 @@
-# tracereq v0.1 — Refined specification
+# xspec v0.1 — Refined specification
 
 **Goal:** A lightweight, domain-agnostic pytest plugin that makes existing tests executable
 acceptance criteria.
@@ -22,7 +22,7 @@ optionally enforces acceptance coverage.
 `pyproject.toml`
 
 ```toml
-[tool.tracereq]
+[tool.xspec]
 requirements = [
     "REQ-001",
     "REQ-002",
@@ -38,17 +38,17 @@ Requirements are declared centrally. No additional metadata is required.
 import pytest
 
 
-@pytest.mark.tracereq("REQ-001")
+@pytest.mark.xspec("REQ-001")
 def test_first_behavior():
     ...
 
 
-@pytest.mark.tracereq("REQ-001")
+@pytest.mark.xspec("REQ-001")
 def test_second_behavior():
     ...
 
 
-@pytest.mark.tracereq("REQ-003")
+@pytest.mark.xspec("REQ-003")
 def test_third_behavior():
     ...
 ```
@@ -56,8 +56,8 @@ def test_third_behavior():
 Multiple markers are supported:
 
 ```python
-@pytest.mark.tracereq("REQ-001")
-@pytest.mark.tracereq("REQ-002")
+@pytest.mark.xspec("REQ-001")
+@pytest.mark.xspec("REQ-002")
 def test_shared_behavior():
     ...
 ```
@@ -86,7 +86,7 @@ A requirement is verified only when every associated test passes.
 ## 4. Strict mode
 
 ```bash
-pytest --tracereq-strict
+pytest --xspec-strict
 ```
 
 Strict mode evaluates **only declared requirements and their associated marked tests**.
@@ -109,11 +109,11 @@ pytest's standard behavior.
 To obtain an acceptance-only CI gate, use:
 
 ```bash
-pytest -m tracereq --tracereq-strict
+pytest -m xspec --xspec-strict
 ```
 
-The plugin should automatically register the `tracereq` marker category or provide an equivalent
-selection mechanism. Since `@pytest.mark.tracereq("REQ-001")` already registers that marker, `-m tracereq`
+The plugin should automatically register the `xspec` marker category or provide an equivalent
+selection mechanism. Since `@pytest.mark.xspec("REQ-001")` already registers that marker, `-m xspec`
 selects marked tests.
 
 ## 5. CLI
@@ -121,17 +121,17 @@ selects marked tests.
 | Command | Behavior |
 |---|---|
 | `pytest` | Normal pytest execution |
-| `pytest --tracereq-report` | Print acceptance report |
-| `pytest --tracereq-strict` | Enforce requirement verification |
-| `pytest -m tracereq --tracereq-strict` | Run only requirement-marked tests |
-| `pytest --tracereq-json=report.json` | Export JSON results |
+| `pytest --xspec-report` | Print acceptance report |
+| `pytest --xspec-strict` | Enforce requirement verification |
+| `pytest -m xspec --xspec-strict` | Run only requirement-marked tests |
+| `pytest --xspec-json=report.json` | Export JSON results |
 
-`--tracereq-strict` should imply report generation.
+`--xspec-strict` should imply report generation.
 
 ## 6. Reporting
 
 ```text
-================ tracereq ================
+================ xspec ================
 
 Requirement                 Status       Tests
 -----------------------------------------------------
@@ -174,10 +174,10 @@ and `-k` is supported because pytest initially collects those tests.
 ## 8. Implementation
 
 ```text
-pytest-tracereq/
+pytest-xspec/
 ├── pyproject.toml
 ├── src/
-│   └── pytest_tracereq/
+│   └── pytest_xspec/
 │       ├── __init__.py
 │       ├── plugin.py
 │       ├── config.py

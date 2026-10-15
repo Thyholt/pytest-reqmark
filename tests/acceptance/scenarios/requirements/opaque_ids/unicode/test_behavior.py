@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.tracereq("Krav / æøå : 1")
+@pytest.mark.xspec("Krav / æøå : 1")
 def test_behavior():
     pass

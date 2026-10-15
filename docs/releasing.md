@@ -6,15 +6,15 @@ See [PyPI account publishing](https://pypi.org/manage/account/publishing/) for s
 
 ## Configure the renamed project's publisher
 
-The distribution is `pytest-tracereq`; `tracereq` on PyPI belongs to a different
-project. Before the first release under the new distribution name, create a
-pending publisher in the intended maintainer's PyPI account with these values:
+The distribution is `pytest-xspec`. Before the first release under the new
+distribution name, create a pending publisher in the intended maintainer's PyPI
+account with these values:
 
 | Field | Value |
 | --- | --- |
-| PyPI project name | `pytest-tracereq` |
+| PyPI project name | `pytest-xspec` |
 | GitHub owner | `Thyholt` |
-| Repository name | `pytest-tracereq` |
+| Repository name | `pytest-xspec` |
 | Workflow filename | `publish.yml` |
 | Environment name | `pypi` |
 
@@ -40,7 +40,7 @@ Create a GitHub release from `master` with a tag matching the package version,
 for example `v0.3.0`. Describe what users can do with this release, then publish it.
 
 Follow the [publishing workflow](../.github/workflows/publish.yml) in GitHub Actions.
-After it succeeds, check [the PyPI project](https://pypi.org/project/pytest-tracereq/)
+After it succeeds, check [the PyPI project](https://pypi.org/project/pytest-xspec/)
 and install the released version in a fresh environment.
 
 If a published version has a serious defect, yank it on PyPI and release a fix

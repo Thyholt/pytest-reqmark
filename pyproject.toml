@@ -3,7 +3,7 @@ requires = ["hatchling>=1.26"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pytest-tracereq"
+name = "pytest-xspec"
 version = "0.4.0"
 description = "Executable acceptance criteria for pytest"
 readme = "README.md"
@@ -12,11 +12,11 @@ dependencies = ["pytest>=8"]
 license = "MIT"
 
 [project.urls]
-Repository = "https://github.com/Thyholt/pytest-tracereq"
-Issues = "https://github.com/Thyholt/pytest-tracereq/issues"
+Repository = "https://github.com/Thyholt/pytest-xspec"
+Issues = "https://github.com/Thyholt/pytest-xspec/issues"
 
 [project.entry-points.pytest11]
-tracereq = "pytest_tracereq.plugin"
+xspec = "pytest_xspec.plugin"
 
 [dependency-groups]
 dev = [
@@ -29,7 +29,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pytest_tracereq"]
+packages = ["src/pytest_xspec"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "examples/test_examples.py"]
@@ -37,7 +37,7 @@ addopts = "-ra -n auto"
 
 [tool.coverage.run]
 branch = true
-source = ["src/pytest_tracereq"]
+source = ["src/pytest_xspec"]
 patch = ["subprocess"]
 relative_files = true
 

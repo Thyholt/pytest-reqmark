@@ -17,7 +17,7 @@ def test_selection_keeps_deselected_requirement_tests_in_the_report(
     project = user_project(["REQ-001", "REQ-002"], deselected_tests)
     project.makefile(".ini", pytest="[pytest]\nmarkers = chosen: selected test\n")
 
-    project.runpytest_subprocess("--tracereq-json=report.json", *selection)
+    project.runpytest_subprocess("--xspec-json=report.json", *selection)
 
     report = read_report(project)
     assert report["requirements"]["REQ-001"]["status"] == "PASSED"
@@ -30,7 +30,7 @@ def test_selection_keeps_deselected_requirement_tests_in_the_report(
 def test_a_requirement_without_any_collected_test_is_missing(user_project, read_report):
     project = user_project(["REQ-001"], missing_requirement)
 
-    project.runpytest_subprocess("--tracereq-json=report.json")
+    project.runpytest_subprocess("--xspec-json=report.json")
 
     report = read_report(project)
     assert expected(report["requirements"]["REQ-001"]).to_have(status="MISSING", tests=[])
@@ -39,7 +39,7 @@ def test_a_requirement_without_any_collected_test_is_missing(user_project, read_
 def test_a_test_outside_the_collected_path_is_not_reported_as_deselected(user_project, read_report):
     project = user_project(["REQ-001"], outside_collected_path)
 
-    project.runpytest_subprocess("test_behavior.py", "--tracereq-json=report.json")
+    project.runpytest_subprocess("test_behavior.py", "--xspec-json=report.json")
 
     report = read_report(project)
     assert expected(report["requirements"]["REQ-001"]).to_have(status="MISSING", tests=[])

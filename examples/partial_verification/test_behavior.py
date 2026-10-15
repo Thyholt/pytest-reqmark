@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.tracereq("REQ-001")
+@pytest.mark.xspec("REQ-001")
 def test_cat_has_a_name():
     cat = {"name": "Chairman Meow"}
 
@@ -10,7 +10,7 @@ def test_cat_has_a_name():
     assert name == "Chairman Meow"
 
 
-@pytest.mark.tracereq("REQ-001")
+@pytest.mark.xspec("REQ-001")
 @pytest.mark.skip(reason="The cat declined the meeting invitation.")
 def test_cat_attends_meetings():
     attendees = ["Chairman Meow"]

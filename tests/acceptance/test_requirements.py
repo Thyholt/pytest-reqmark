@@ -32,7 +32,7 @@ from tests.acceptance.scenarios.requirements.opaque_ids import dotted, simple, u
 def test_requirement_ids_are_opaque_strings(user_project, read_report, requirement, scenario):
     project = user_project([requirement], scenario)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json", "--strict-markers")
+    result = project.runpytest_subprocess("--xspec-json=report.json", "--strict-markers")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -43,7 +43,7 @@ def test_one_test_can_verify_several_requirements(user_project, read_report):
     project = user_project(["REQ-001", "REQ-002"], multiple_requirements)
     expected_tests = [("test_behavior.py::test_shared_behavior", "PASSED")]
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -59,7 +59,7 @@ def test_every_parameterized_case_is_an_individual_acceptance_test(user_project,
         ("test_behavior.py::test_behavior[second]", "PASSED"),
     ]
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=2)
@@ -72,7 +72,7 @@ def test_every_parameterized_case_is_an_individual_acceptance_test(user_project,
 def test_requirement_markers_can_be_inherited_from_a_test_class(user_project, read_report):
     project = user_project(["REQ-001"], class_markers)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=2)
@@ -89,7 +89,7 @@ def test_requirement_markers_can_be_inherited_from_a_test_class(user_project, re
 def test_repeating_a_marker_does_not_count_the_same_test_twice(user_project, read_report):
     project = user_project(["REQ-001"], repeated_marker)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1)
@@ -102,15 +102,15 @@ def test_repeating_a_marker_does_not_count_the_same_test_twice(user_project, rea
 @pytest.mark.parametrize(
     ("scenario", "diagnostic"),
     [
-        pytest.param(unknown_id, "UNKNOWN", id='tracereq("UNKNOWN")-UNKNOWN'),
-        pytest.param(missing_id, "tracereq", id="tracereq()-tracereq"),
-        pytest.param(non_string_id, "tracereq", id="tracereq(123)-tracereq"),
-        pytest.param(multiple_ids, "tracereq", id='tracereq("REQ-001", "REQ-002")-tracereq'),
-        pytest.param(keyword_id, "tracereq", id='tracereq(id="REQ-001")-tracereq'),
+        pytest.param(unknown_id, "UNKNOWN", id='xspec("UNKNOWN")-UNKNOWN'),
+        pytest.param(missing_id, "xspec", id="xspec()-xspec"),
+        pytest.param(non_string_id, "xspec", id="xspec(123)-xspec"),
+        pytest.param(multiple_ids, "xspec", id='xspec("REQ-001", "REQ-002")-xspec'),
+        pytest.param(keyword_id, "xspec", id='xspec(id="REQ-001")-xspec'),
     ],
 )
 @pytest.mark.parametrize(
-    "reporting", [(), ("--tracereq-report",)], ids=["plain-pytest", "with-report"]
+    "reporting", [(), ("--xspec-report",)], ids=["plain-pytest", "with-report"]
 )
 def test_invalid_requirement_markers_are_rejected_with_a_useful_message(
     user_project, scenario, diagnostic, reporting
@@ -129,7 +129,7 @@ def test_invalid_requirement_markers_are_rejected_with_a_useful_message(
 def test_invalid_markers_are_rejected_even_when_the_test_is_deselected(user_project):
     project = user_project(["REQ-001"], invalid_deselected_marker)
 
-    result = project.runpytest_subprocess("-k", "selected", "--tracereq-report")
+    result = project.runpytest_subprocess("-k", "selected", "--xspec-report")
 
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
@@ -140,10 +140,10 @@ def test_invalid_markers_are_rejected_even_when_the_test_is_deselected(user_proj
 def test_invalid_requirement_configuration_is_rejected(user_project, inventory):
     project = user_project([], invalid_inventory)
     (project.path / "pyproject.toml").write_text(
-        f"[tool.tracereq]\nrequirements = {inventory}\n", encoding="utf-8"
+        f"[tool.xspec]\nrequirements = {inventory}\n", encoding="utf-8"
     )
 
-    result = project.runpytest_subprocess("--tracereq-report")
+    result = project.runpytest_subprocess("--xspec-report")
 
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()

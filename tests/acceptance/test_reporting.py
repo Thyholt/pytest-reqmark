@@ -10,12 +10,12 @@ from tests.acceptance.scenarios.reporting import empty_inventory, summary
 def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(user_project):
     project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
-    result = project.runpytest_subprocess("--tracereq-report")
+    result = project.runpytest_subprocess("--xspec-report")
 
     assert result.ret == pytest.ExitCode.OK
     result.stdout.fnmatch_lines(
         [
-            "*tracereq*",
+            "*xspec*",
             "*REQ-001*PASSED*2*",
             "*REQ-002*MISSING*0*",
             "*REQ-003*SKIPPED*1*",
@@ -30,8 +30,8 @@ def test_terminal_report_shows_requirement_statuses_test_counts_and_coverage(use
 @pytest.mark.parametrize(
     ("report_option", "expected_exit"),
     [
-        pytest.param("--tracereq-report", pytest.ExitCode.OK, id="report"),
-        pytest.param("--tracereq-strict", pytest.ExitCode.TESTS_FAILED, id="strict"),
+        pytest.param("--xspec-report", pytest.ExitCode.OK, id="report"),
+        pytest.param("--xspec-strict", pytest.ExitCode.TESTS_FAILED, id="strict"),
     ],
 )
 def test_an_unverified_terminal_report_is_red(user_project, report_option, expected_exit):
@@ -42,7 +42,7 @@ def test_an_unverified_terminal_report_is_red(user_project, report_option, expec
     assert result.ret == expected_exit
     result.stdout.fnmatch_lines(
         [
-            "\x1b[31m*tracereq*\x1b[0m",
+            "\x1b[31m*xspec*\x1b[0m",
             "\x1b[31mRequirement*Status*Tests\x1b[0m",
             "\x1b[31mREQ-001*PASSED*2\x1b[0m",
             "\x1b[31mREQ-002*MISSING*0\x1b[0m",
@@ -55,7 +55,7 @@ def test_an_unverified_terminal_report_is_red(user_project, report_option, expec
     )
 
 
-@pytest.mark.parametrize("report_option", ["--tracereq-report", "--tracereq-strict"])
+@pytest.mark.parametrize("report_option", ["--xspec-report", "--xspec-strict"])
 def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
     user_project, read_report, report_option
 ):
@@ -65,7 +65,7 @@ def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
         "--continue-on-collection-errors",
         report_option,
         "--color=yes",
-        "--tracereq-json=report.json",
+        "--xspec-json=report.json",
     )
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
@@ -74,7 +74,7 @@ def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
     assert report["summary"]["verified"] is False
     result.stdout.fnmatch_lines(
         [
-            "\x1b[31m*tracereq*\x1b[0m",
+            "\x1b[31m*xspec*\x1b[0m",
             "\x1b[31mRequirement*Status*Tests\x1b[0m",
             "\x1b[31mREQ-001*PASSED*1\x1b[0m",
             "\x1b[31mRequirements: 1\x1b[0m",
@@ -98,21 +98,19 @@ def test_collection_errors_make_the_terminal_report_red_even_at_full_coverage(
         ),
     ],
 )
-@pytest.mark.parametrize("report_option", ["--tracereq-report", "--tracereq-strict"])
+@pytest.mark.parametrize("report_option", ["--xspec-report", "--xspec-strict"])
 def test_a_verified_terminal_report_is_green(
     user_project, read_report, requirements, scenario, expected_exit, coverage, report_option
 ):
     project = user_project(requirements, scenario)
 
-    result = project.runpytest_subprocess(
-        report_option, "--color=yes", "--tracereq-json=report.json"
-    )
+    result = project.runpytest_subprocess(report_option, "--color=yes", "--xspec-json=report.json")
 
     assert result.ret == expected_exit
     report = read_report(project)
     assert report["summary"]["verified"] is True
     report_start = next(
-        index for index, line in enumerate(result.stdout.lines) if " tracereq " in line
+        index for index, line in enumerate(result.stdout.lines) if " xspec " in line
     )
     report_end = next(
         index for index, line in enumerate(result.stdout.lines) if f"Coverage: {coverage}" in line
@@ -133,11 +131,11 @@ def test_a_verified_terminal_report_is_green(
 def test_terminal_report_color_can_be_disabled(user_project, requirements, scenario, coverage):
     project = user_project(requirements, scenario)
 
-    result = project.runpytest_subprocess("--tracereq-report", "--color=no")
+    result = project.runpytest_subprocess("--xspec-report", "--color=no")
 
     assert result.ret == pytest.ExitCode.OK
     assert "\x1b[" not in result.stdout.str()
-    result.stdout.fnmatch_lines(["*tracereq*", f"Coverage: {coverage}"])
+    result.stdout.fnmatch_lines(["*xspec*", f"Coverage: {coverage}"])
 
 
 def test_json_report_includes_all_requirements_individual_tests_and_summary(
@@ -145,7 +143,7 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
 ):
     project = user_project(["REQ-001", "REQ-002", "REQ-003"], summary)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -180,9 +178,9 @@ def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
     project = user_project([], empty_inventory)
     if config_file == "pytest.ini":
         (project.path / "pyproject.toml").unlink()
-        project.makefile(".ini", pytest="[pytest]\ntracereq =\n")
+        project.makefile(".ini", pytest="[pytest]\nxspec =\n")
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
