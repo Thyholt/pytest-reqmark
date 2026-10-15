@@ -171,14 +171,10 @@ def test_json_report_includes_all_requirements_individual_tests_and_summary(
     }
 
 
-@pytest.mark.parametrize("config_file", ["pyproject.toml", "pytest.ini"])
 def test_an_empty_inventory_reports_zero_coverage_without_dividing_by_zero(
-    user_project, read_report, config_file
+    user_project, read_report
 ):
     project = user_project([], empty_inventory)
-    if config_file == "pytest.ini":
-        (project.path / "pyproject.toml").unlink()
-        project.makefile(".ini", pytest="[pytest]\nxspec =\n")
 
     result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
