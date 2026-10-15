@@ -27,7 +27,7 @@ def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
 
     result.assert_outcomes(passed=1)
     assert result.ret == pytest.ExitCode.OK
-    assert " tracereq " not in result.stdout.str()
+    assert " xspec " not in result.stdout.str()
 
 
 @pytest.mark.parametrize(
@@ -43,18 +43,18 @@ def test_plain_pytest_runs_normally_without_an_acceptance_report(user_project):
 def test_strict_mode_rejects_every_executed_unverified_outcome(user_project, scenario, status):
     project = user_project(["REQ-001"], scenario)
 
-    result = project.runpytest_subprocess("--tracereq-strict")
+    result = project.runpytest_subprocess("--xspec-strict")
 
     assert result.ret != pytest.ExitCode.OK
     output = result.stdout.str()
-    assert " tracereq " in output
+    assert " xspec " in output
     assert status in output
 
 
 def test_strict_mode_rejects_missing_requirements(user_project):
     project = user_project(["REQ-001"], missing_requirement)
 
-    result = project.runpytest_subprocess("--tracereq-strict")
+    result = project.runpytest_subprocess("--xspec-strict")
 
     assert result.ret != pytest.ExitCode.OK
     assert "MISSING" in result.stdout.str()
@@ -63,7 +63,7 @@ def test_strict_mode_rejects_missing_requirements(user_project):
 def test_strict_mode_rejects_deselected_requirement_tests(user_project):
     project = user_project(["REQ-001"], deselected_requirement)
 
-    result = project.runpytest_subprocess("-k", "selected", "--tracereq-strict")
+    result = project.runpytest_subprocess("-k", "selected", "--xspec-strict")
 
     assert result.ret != pytest.ExitCode.OK
     assert "DESELECTED" in result.stdout.str()
@@ -72,11 +72,11 @@ def test_strict_mode_rejects_deselected_requirement_tests(user_project):
 def test_strict_mode_succeeds_and_prints_a_report_when_every_requirement_passes(user_project):
     project = user_project(["REQ-001"], all_requirements_pass)
 
-    result = project.runpytest_subprocess("--tracereq-strict")
+    result = project.runpytest_subprocess("--xspec-strict")
 
     assert result.ret == pytest.ExitCode.OK
     output = result.stdout.str()
-    assert " tracereq " in output
+    assert " xspec " in output
     assert "PASSED" in output
 
 
@@ -92,7 +92,7 @@ def test_unmarked_outcomes_do_not_change_acceptance_verification(
 ):
     project = user_project(["REQ-001"], scenario)
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     report = read_report(project)
     assert report["requirements"]["REQ-001"]["status"] == "PASSED"
@@ -104,7 +104,7 @@ def test_acceptance_only_ci_ignores_failing_unmarked_tests(user_project, read_re
     project = user_project(["REQ-001"], acceptance_only)
 
     result = project.runpytest_subprocess(
-        "-m", "tracereq", "--tracereq-strict", "--tracereq-json=report.json"
+        "-m", "xspec", "--xspec-strict", "--xspec-json=report.json"
     )
 
     assert result.ret == pytest.ExitCode.OK
@@ -116,11 +116,11 @@ def test_a_collection_error_prevents_a_successful_strict_verdict(user_project, r
     project = user_project(["REQ-001"], collection_error)
 
     result = project.runpytest_subprocess(
-        "--continue-on-collection-errors", "--tracereq-strict", "--tracereq-json=report.json"
+        "--continue-on-collection-errors", "--xspec-strict", "--xspec-json=report.json"
     )
 
     assert result.ret != pytest.ExitCode.OK
-    result.stdout.fnmatch_lines(["*tracereq*", "*Collection errors:*1*"])
+    result.stdout.fnmatch_lines(["*xspec*", "*Collection errors:*1*"])
     report = read_report(project)
     assert report["requirements"]["REQ-001"]["status"] == "PASSED"
     assert report["summary"]["verified"] is False

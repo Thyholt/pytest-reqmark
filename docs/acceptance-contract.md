@@ -10,32 +10,32 @@ Declare opaque requirement IDs in either:
 
 ```toml
 # pyproject.toml
-[tool.tracereq]
+[tool.xspec]
 requirements = ["REQ-001", "REQ-002"]
 ```
 
 ```ini
 # pytest.ini
 [pytest]
-tracereq =
+xspec =
     REQ-001
     REQ-002
 ```
 
 Accepted configuration decisions:
 
-- `tracereq` uses one ID per line in `pytest.ini`.
+- `xspec` uses one ID per line in `pytest.ini`.
 - If both files declare inventories, fail with a message naming both files rather
   than merge them or silently choose one. A `pytest.ini` without an inventory can
   coexist with an inventory in `pyproject.toml`.
 - No inventory is read from `setup.cfg`, `tox.ini`, JSON, YAML or other files.
   Ordinary pytest may still use its own supported configuration files.
-- Duplicate IDs and non-string IDs are rejected. Each `tracereq` marker takes exactly
+- Duplicate IDs and non-string IDs are rejected. Each `xspec` marker takes exactly
   one positional string ID and no keyword arguments. Multiple IDs use multiple markers.
 
-Project naming is fixed: distribution and repository `pytest-tracereq`, Python
-package `pytest_tracereq`, pytest entry point `tracereq`, and TOML inventory
-section `[tool.tracereq]`.
+Project naming is fixed: distribution and repository `pytest-xspec`, Python
+package `pytest_xspec`, pytest entry point `xspec`, and TOML inventory
+section `[tool.xspec]`.
 
 Confirmed requirement: zero declared requirements means success with zero
 requirements, both for an explicitly empty inventory and when no requirement
@@ -109,7 +109,7 @@ still return a failure. Requirement coverage can be 100% after a partial
 collection, but `verified` must remain false when collection errors exist.
 
 When terminal colors are enabled, the entire acceptance report is red if
-`summary.verified` is false, both with `--tracereq-report` and `--tracereq-strict`.
+`summary.verified` is false, both with `--xspec-report` and `--xspec-strict`.
 Successful verification makes the entire report green, including zero requirements
 and runs with failing unmarked tests. The report respects pytest's color
 settings, including `--color=no`.

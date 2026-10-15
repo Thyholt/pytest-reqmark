@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.tracereq("UNKNOWN")
+@pytest.mark.xspec("UNKNOWN")
 def test_invalid():
     pass
 

@@ -6,28 +6,24 @@ from pathlib import Path
 import pytest
 from _pytest.terminal import TerminalReporter
 
-from pytest_tracereq.collector import requirement_ids
-from pytest_tracereq.config import load_requirements
-from pytest_tracereq.outcomes import aggregate, phase_outcome
-from pytest_tracereq.reporting import build_report, write_json, write_terminal
+from pytest_xspec.collector import requirement_ids
+from pytest_xspec.config import load_requirements
+from pytest_xspec.outcomes import aggregate, phase_outcome
+from pytest_xspec.reporting import build_report, write_json, write_terminal
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
-    group = parser.getgroup("tracereq")
-    group.addoption("--tracereq-report", action="store_true", help="Print requirement verification")
-    group.addoption(
-        "--tracereq-strict", action="store_true", help="Fail on unverified requirements"
-    )
-    group.addoption(
-        "--tracereq-json", metavar="PATH", help="Write requirement verification as JSON"
-    )
+    group = parser.getgroup("xspec")
+    group.addoption("--xspec-report", action="store_true", help="Print requirement verification")
+    group.addoption("--xspec-strict", action="store_true", help="Fail on unverified requirements")
+    group.addoption("--xspec-json", metavar="PATH", help="Write requirement verification as JSON")
 
-    parser.addini("tracereq", "Requirement IDs, one per line (pytest.ini only)", "linelist")
+    parser.addini("xspec", "Requirement IDs, one per line (pytest.ini only)", "linelist")
 
 
 def pytest_configure(config: pytest.Config) -> None:
-    config.addinivalue_line("markers", "tracereq(id): associate a test with a declared requirement")
-    config.pluginmanager.register(RequirementPlugin(config), "tracereq-results")
+    config.addinivalue_line("markers", "xspec(id): associate a test with a declared requirement")
+    config.pluginmanager.register(RequirementPlugin(config), "xspec-results")
 
 
 class RequirementPlugin:
@@ -79,19 +75,19 @@ class RequirementPlugin:
     def pytest_sessionfinish(self, session: pytest.Session) -> None:
         report = build_report(self.requirements, self.outcomes, self.collection_errors)
 
-        path = self.config.getoption("tracereq_json")
+        path = self.config.getoption("xspec_json")
         if path:
             write_json(report, Path(path))
 
         if (
-            self.config.getoption("tracereq_strict")
+            self.config.getoption("xspec_strict")
             and not report["summary"]["verified"]
             and session.exitstatus in (pytest.ExitCode.OK, pytest.ExitCode.NO_TESTS_COLLECTED)
         ):
             session.exitstatus = pytest.ExitCode.TESTS_FAILED
 
     def pytest_terminal_summary(self, terminalreporter: TerminalReporter) -> None:
-        if self.config.getoption("tracereq_report") or self.config.getoption("tracereq_strict"):
+        if self.config.getoption("xspec_report") or self.config.getoption("xspec_strict"):
             write_terminal(
                 build_report(self.requirements, self.outcomes, self.collection_errors),
                 terminalreporter,

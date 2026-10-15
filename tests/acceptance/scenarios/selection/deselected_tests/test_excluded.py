@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.tracereq("REQ-002")
+@pytest.mark.xspec("REQ-002")
 def test_other():
     pass

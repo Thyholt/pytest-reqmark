@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pytest_tracereq.reporting import build_report, write_json
+from pytest_xspec.reporting import build_report, write_json
 
 
 def test_a_directory_cannot_be_used_as_the_json_report_file(tmp_path: Path):
@@ -15,4 +15,4 @@ def test_a_directory_cannot_be_used_as_the_json_report_file(tmp_path: Path):
     with pytest.raises(pytest.UsageError) as error:
         write_json(report, path)
 
-    assert f"Cannot write tracereq JSON report {path}:" in str(error.value)
+    assert f"Cannot write xspec JSON report {path}:" in str(error.value)

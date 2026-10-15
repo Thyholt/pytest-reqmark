@@ -19,9 +19,9 @@ from tests.acceptance.scenarios.configuration import (
 def test_requirements_can_be_declared_in_pytest_ini(user_project, read_report):
     project = user_project(["REQ-001"], pytest_ini_inventory)
     (project.path / "pyproject.toml").unlink()
-    project.makefile(".ini", pytest="[pytest]\ntracereq =\n    REQ-001\n    REQ-002\n")
+    project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-001\n    REQ-002\n")
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -35,7 +35,7 @@ def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
     project = user_project(["REQ-001"], pyproject_with_pytest_ini)
     project.makefile(".ini", pytest="[pytest]\naddopts = -q\n")
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret == 0
     report = read_report(project)
@@ -44,9 +44,9 @@ def test_pyproject_inventory_is_read_even_when_pytest_ini_controls_pytest(
 
 def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project):
     project = user_project(["REQ-001"], conflicting_inventories)
-    project.makefile(".ini", pytest="[pytest]\ntracereq =\n    REQ-002\n")
+    project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-002\n")
 
-    result = project.runpytest_subprocess("--tracereq-report")
+    result = project.runpytest_subprocess("--xspec-report")
 
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
@@ -57,8 +57,8 @@ def test_declaring_an_inventory_in_both_supported_files_is_rejected(user_project
 @pytest.mark.parametrize(
     ("filename", "content"),
     [
-        ("setup.cfg", "[tool:pytest]\ntracereq = REQ-001\n"),
-        ("tox.ini", "[pytest]\ntracereq = REQ-001\n"),
+        ("setup.cfg", "[tool:pytest]\nxspec = REQ-001\n"),
+        ("tox.ini", "[pytest]\nxspec = REQ-001\n"),
         ("requirements.json", '{"requirements": ["REQ-001"]}'),
         ("requirements.yaml", "requirements:\n  - REQ-001\n"),
     ],
@@ -70,7 +70,7 @@ def test_other_configuration_files_do_not_supply_a_requirement_inventory(
     (project.path / "pyproject.toml").unlink()
     (project.path / filename).write_text(content, encoding="utf-8")
 
-    result = project.runpytest_subprocess("--tracereq-strict")
+    result = project.runpytest_subprocess("--xspec-strict")
 
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
@@ -93,7 +93,7 @@ def test_no_requirement_configuration_means_success_with_zero_requirements(
     project = user_project([], zero_requirements_without_configuration)
     (project.path / "pyproject.toml").unlink()
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -113,7 +113,7 @@ def test_no_requirement_configuration_means_success_with_zero_requirements(
 def test_duplicate_requirement_ids_in_pytest_ini_are_rejected(user_project):
     project = user_project(["REQ-001"], duplicate_ini_ids)
     (project.path / "pyproject.toml").unlink()
-    project.makefile(".ini", pytest="[pytest]\ntracereq =\n    REQ-001\n    REQ-001\n")
+    project.makefile(".ini", pytest="[pytest]\nxspec =\n    REQ-001\n    REQ-001\n")
 
     result = project.runpytest_subprocess()
 
@@ -131,7 +131,7 @@ def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
     if config_file != "pyproject.toml":
         (project.path / "pyproject.toml").unlink()
     if config_file == "pytest.ini":
-        project.makefile(".ini", pytest="[pytest]\ntracereq =\n")
+        project.makefile(".ini", pytest="[pytest]\nxspec =\n")
 
     result = project.runpytest_subprocess()
 
@@ -144,8 +144,8 @@ def test_unknown_marked_ids_are_rejected_even_when_no_requirements_are_declared(
 @pytest.mark.parametrize(
     ("filename", "content"),
     [
-        ("setup.cfg", "[tool:pytest]\ntracereq = REQ-001\n"),
-        ("tox.ini", "[pytest]\ntracereq = REQ-001\n"),
+        ("setup.cfg", "[tool:pytest]\nxspec = REQ-001\n"),
+        ("tox.ini", "[pytest]\nxspec = REQ-001\n"),
         ("requirements.json", '{"requirements": ["REQ-001"]}'),
         ("requirements.yaml", "requirements:\n  - REQ-001\n"),
     ],
@@ -157,7 +157,7 @@ def test_unsupported_inventory_files_are_ignored_when_tests_are_unmarked(
     (project.path / "pyproject.toml").unlink()
     (project.path / filename).write_text(content, encoding="utf-8")
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     result.assert_outcomes(passed=1)

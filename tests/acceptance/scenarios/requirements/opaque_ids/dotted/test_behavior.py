@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.tracereq("requirement.group.item")
+@pytest.mark.xspec("requirement.group.item")
 def test_behavior():
     pass

@@ -51,7 +51,7 @@ def test_the_report_explains_the_outcome_of_a_marked_test(
 ):
     project = user_project(["REQ-001"], scenario)
 
-    project.runpytest_subprocess("--tracereq-json=report.json")
+    project.runpytest_subprocess("--xspec-json=report.json")
 
     report = read_report(project)
     assert expected(report["requirements"]["REQ-001"]).to_have(
@@ -63,7 +63,7 @@ def test_the_report_explains_the_outcome_of_a_marked_test(
 def test_teardown_errors_make_a_passing_test_unverified(user_project, read_report):
     project = user_project(["REQ-001"], teardown_error_after_pass)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     report = read_report(project)
@@ -75,7 +75,7 @@ def test_teardown_errors_make_a_passing_test_unverified(user_project, read_repor
 def test_teardown_errors_take_precedence_over_a_test_failure(user_project, read_report):
     project = user_project(["REQ-001"], teardown_error_after_failure)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     report = read_report(project)
@@ -87,7 +87,7 @@ def test_teardown_errors_take_precedence_over_a_test_failure(user_project, read_
 def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
     project = user_project(["REQ-001"], fixture_skip)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -105,7 +105,7 @@ def test_a_fixture_skip_is_reported_as_skipped(user_project, read_report):
     ("options", "expected_exit"),
     [
         pytest.param((), pytest.ExitCode.OK, id="report"),
-        pytest.param(("--tracereq-strict",), pytest.ExitCode.TESTS_FAILED, id="strict"),
+        pytest.param(("--xspec-strict",), pytest.ExitCode.TESTS_FAILED, id="strict"),
     ],
 )
 def test_fixture_expected_failures_are_xfailed_and_keep_requirements_unverified(
@@ -113,7 +113,7 @@ def test_fixture_expected_failures_are_xfailed_and_keep_requirements_unverified(
 ):
     project = user_project(["REQ-001"], scenario)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json", *options)
+    result = project.runpytest_subprocess("--xspec-json=report.json", *options)
 
     assert result.ret == expected_exit
     report = read_report(project)
@@ -126,7 +126,7 @@ def test_fixture_expected_failures_are_xfailed_and_keep_requirements_unverified(
 def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, read_report):
     project = user_project(["REQ-001"], strict_xpass)
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     report = read_report(project)
@@ -139,7 +139,7 @@ def test_strict_xfail_still_reports_an_unexpected_pass_as_xpassed(user_project, 
 def test_an_assertion_mentioning_xpass_is_reported_as_failed(user_project, read_report):
     project = user_project(["REQ-001"], assertion_with_xpass_text)
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     report = read_report(project)
@@ -162,7 +162,7 @@ def test_setup_errors_take_priority_over_test_failures(user_project, read_report
     }
     expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json", *node_ids)
+    result = project.runpytest_subprocess("--xspec-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     report = read_report(project)
@@ -182,7 +182,7 @@ def test_failures_take_priority_over_unexpected_passes(user_project, read_report
     }
     expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json", *node_ids)
+    result = project.runpytest_subprocess("--xspec-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
     report = read_report(project)
@@ -209,7 +209,7 @@ def test_unexpected_passes_take_priority_over_expected_failures(
     }
     expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json", *node_ids)
+    result = project.runpytest_subprocess("--xspec-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -231,7 +231,7 @@ def test_expected_failures_take_priority_over_skips(user_project, read_report, t
     }
     expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
-    result = project.runpytest_subprocess("--tracereq-json=report.json", *node_ids)
+    result = project.runpytest_subprocess("--xspec-json=report.json", *node_ids)
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -254,7 +254,7 @@ def test_skips_take_priority_over_deselection(user_project, read_report, test_or
     expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess(
-        "--tracereq-json=report.json", *node_ids, "-k", "not excluded"
+        "--xspec-json=report.json", *node_ids, "-k", "not excluded"
     )
 
     assert result.ret == pytest.ExitCode.OK
@@ -280,7 +280,7 @@ def test_deselection_prevents_verification_despite_a_passing_test(
     expected_tests = [(node_id, expected_outcomes[node_id]) for node_id in node_ids]
 
     result = project.runpytest_subprocess(
-        "--tracereq-json=report.json", *node_ids, "-k", "not excluded"
+        "--xspec-json=report.json", *node_ids, "-k", "not excluded"
     )
 
     assert result.ret == pytest.ExitCode.OK
@@ -293,7 +293,7 @@ def test_deselection_prevents_verification_despite_a_passing_test(
 def test_a_requirement_is_verified_when_both_associated_tests_pass(user_project, read_report):
     project = user_project(["REQ-001"], both_tests_pass)
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret == pytest.ExitCode.OK
     report = read_report(project)
@@ -319,7 +319,7 @@ def test_one_passing_test_does_not_verify_a_requirement_with_an_unverified_test(
 ):
     project = user_project(["REQ-001"], scenario)
 
-    result = project.runpytest_subprocess("--tracereq-strict", "--tracereq-json=report.json")
+    result = project.runpytest_subprocess("--xspec-strict", "--xspec-json=report.json")
 
     assert result.ret != pytest.ExitCode.OK
     report = read_report(project)
@@ -337,7 +337,7 @@ def test_collect_only_keeps_associated_tests_unverified(user_project, read_repor
     project = user_project(["REQ-001"], both_tests_pass)
 
     result = project.runpytest_subprocess(
-        "--collect-only", "--tracereq-strict", "--tracereq-json=report.json"
+        "--collect-only", "--xspec-strict", "--xspec-json=report.json"
     )
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
@@ -356,7 +356,7 @@ def test_early_stop_reports_a_collected_but_unexecuted_test_as_skipped(user_proj
     project = user_project(["REQ-001", "REQ-002"], early_stop)
 
     result = project.runpytest_subprocess(
-        "--maxfail=1", "--tracereq-strict", "--tracereq-json=report.json"
+        "--maxfail=1", "--xspec-strict", "--xspec-json=report.json"
     )
 
     assert result.ret != pytest.ExitCode.OK
@@ -384,7 +384,7 @@ def test_a_passing_test_does_not_verify_a_requirement_when_another_test_never_ru
     ]
 
     result = project.runpytest_subprocess(
-        "--maxfail=1", "--tracereq-strict", "--tracereq-json=report.json", *node_ids
+        "--maxfail=1", "--xspec-strict", "--xspec-json=report.json", *node_ids
     )
 
     assert result.ret == pytest.ExitCode.TESTS_FAILED
