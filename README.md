@@ -184,7 +184,7 @@ See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
 [contributing]: https://github.com/Thyholt/pytest-xspec/blob/master/CONTRIBUTING.md
 
 [pypi]: https://pypi.org/project/pytest-xspec/
-[pypi-version-badge]: https://img.shields.io/pypi/v/pytest-xspec
+[pypi-version-badge]: https://img.shields.io/pypi/v/pytest-xspec.svg
 [python-versions-badge]: https://img.shields.io/badge/python-3.10%2B-blue
 [tests]: https://github.com/Thyholt/pytest-xspec/actions/workflows/check.yml
 [tests-badge]: https://img.shields.io/github/actions/workflow/status/Thyholt/pytest-xspec/check.yml?branch=master&label=tests
