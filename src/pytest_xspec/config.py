@@ -3,6 +3,7 @@
 import configparser
 import sys
 from importlib import import_module
+from typing import cast
 
 import pytest
 
@@ -61,4 +62,5 @@ def _validate_inventory(requirements: object, source: str) -> list[str]:
 
         seen.add(requirement)
 
-    return requirements
+    # The element checks above establish the list's type, which ty cannot narrow.
+    return cast(list[str], requirements)
