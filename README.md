@@ -19,28 +19,31 @@ automatically. Python 3.10+ and pytest 8+ are supported.
 pip install pytest-xspec
 ```
 
-### Declare specifications
+### Write your specifications
 
-Declare specification IDs under `requirements` in `pyproject.toml`.
+Create `xspec.toml` in pytest's project root, usually the top-level project directory.
+Keep each specification, its description and the reason it matters together in one document.
 
 ```toml
-[tool.xspec]
-requirements = ["REQ-001", "REQ-002"]
+[[requirements]]
+id = "REQ-001"
+description = "Adding two integers returns their sum."
+rationale = "Calculations must give predictable results."
+
+[[requirements]]
+id = "REQ-002"
+description = "Adding zero leaves the value unchanged."
 ```
 
-Alternatively, use one ID per line in `pytest.ini`.
+Use one `[[requirements]]` entry per specification. Each entry needs an `id`.
+The `description` states the requirement, and the `rationale` explains why it matters.
+Both are optional and can be empty strings. This text stays in the document,
+while tests and reports refer only to the IDs.
 
-```ini
-[pytest]
-xspec =
-    REQ-001
-    REQ-002
-```
+See the [specification document example][specification-document] for a complete runnable project.
 
-Declare specifications in one of these files. Using both is an error, and other
-files do not supply specifications. IDs are opaque strings. Duplicates and marked
-IDs that have not been declared are rejected. No inventory, or an empty inventory,
-means zero specifications.
+For specifications maintained in other documents or tables,
+[declare just their IDs](#use-an-existing-specification).
 
 ### Mark tests
 
@@ -52,8 +55,8 @@ import pytest
 
 @pytest.mark.xspec("REQ-001")
 @pytest.mark.xspec("REQ-002")
-def test_shared_behavior():
-    assert 1 + 1 == 2
+def test_adding_zero_preserves_the_value() -> None:
+    assert 2 + 0 == 2
 ```
 
 ### Run pytest
@@ -125,6 +128,50 @@ the plugin still knows about the tests excluded by the filter and reports marked
 ones as `DESELECTED`. If you run only one folder, it cannot see tests in other
 folders.
 
+## Use an existing specification
+
+If you maintain specifications elsewhere, declare their IDs in `pyproject.toml`
+or `pytest.ini`. Your original document remains the source for descriptions and context.
+The markers, commands and reports work the same way with either configuration format.
+
+In `pyproject.toml`, use a list of IDs:
+
+```toml
+[tool.xspec]
+requirements = ["REQ-001", "REQ-002"]
+```
+
+In `pytest.ini`, use one ID per line:
+
+```ini
+[pytest]
+xspec =
+    REQ-001
+    REQ-002
+```
+
+### How the source is chosen
+
+An ID list in either configuration file takes precedence over `xspec.toml`.
+Declaring IDs in both `pyproject.toml` and `pytest.ini` is an error.
+Specifications from different sources are never merged.
+
+When neither configuration file declares IDs, `pytest-xspec` reads `xspec.toml`
+from the project root. Those configuration files can still contain other settings.
+An explicitly empty ID list also takes precedence, so it declares zero specifications
+even when `xspec.toml` contains entries. An unused `xspec.toml` is not read or validated.
+
+### Empty specifications and validation
+
+IDs are strings and are used exactly as written. Duplicate IDs and markers referring
+to undeclared IDs are rejected. In `xspec.toml`, supplied descriptions and rationales
+must also be strings. Additional fields are ignored.
+
+To declare zero specifications in `xspec.toml`, write `requirements = []`.
+A document without `requirements`, including an empty file, is a configuration error.
+Invalid documents produce an error before tests run.
+If no source exists, there are zero declared specifications.
+
 ## Runnable examples
 
 Start with [the pizza][pizza], then try the other
@@ -135,6 +182,7 @@ Run the commands below from the repository root. Dependencies are installed auto
 | Example | With `--xspec-strict` | Exit code |
 | --- | --- | --- |
 | [Quickstart][quickstart] - Two slices of pizza | `PASSED`, 100% coverage | 0 |
+| [Specification document][specification-document] - Addition rules in TOML | `PASSED`, 100% coverage | 0 |
 | [Missing specification][missing-requirement] - A lost sock | `MISSING`, 50% coverage | 1 |
 | [Partial verification][partial-verification] - Cat skips a meeting | `SKIPPED`, 0% coverage | 1 |
 | [Acceptance only][acceptance-only] - Duck versus cheese | `PASSED` with `-m xspec` | 0 |
@@ -146,6 +194,10 @@ Run the `Quickstart` example, then replace `quickstart` with another example fol
 ```sh
 uv run --locked pytest examples/quickstart --xspec-strict
 ```
+
+For `specification_document`, the requirements live in
+[xspec.toml](examples/specification_document/xspec.toml).
+Its `pyproject.toml` only sets test discovery, leaving the document as the requirement source.
 
 For `acceptance_only`, add `-m xspec` to run only the marked test.
 Without that filter, the unmarked test makes pytest fail.
@@ -168,7 +220,7 @@ Check that every example behaves as described.
 uv run --locked pytest examples/test_examples.py -n 0
 ```
 
-All five checks should pass, including checks for the examples that deliberately
+All six checks should pass, including checks for the examples that deliberately
 fail. The examples are also verified in CI.
 
 ## Contributing
@@ -178,6 +230,7 @@ See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
 [acceptance-only]: https://github.com/Thyholt/pytest-xspec/tree/master/examples/acceptance_only
 [pizza]: https://github.com/Thyholt/pytest-xspec/blob/master/examples/quickstart/test_behavior.py
 [quickstart]: https://github.com/Thyholt/pytest-xspec/tree/master/examples/quickstart
+[specification-document]: https://github.com/Thyholt/pytest-xspec/tree/master/examples/specification_document
 [missing-requirement]: https://github.com/Thyholt/pytest-xspec/tree/master/examples/missing_requirement
 [partial-verification]: https://github.com/Thyholt/pytest-xspec/tree/master/examples/partial_verification
 [report]: https://github.com/Thyholt/pytest-xspec/blob/master/examples/quickstart/report.json

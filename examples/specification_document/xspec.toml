@@ -1,0 +1,8 @@
+[[requirements]]
+id = "REQ-001"
+description = "Adding two integers returns their sum."
+rationale = "Calculations must give predictable results."
+
+[[requirements]]
+id = "REQ-002"
+description = "Adding zero leaves the value unchanged."
