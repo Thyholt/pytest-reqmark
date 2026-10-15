@@ -24,6 +24,11 @@ Use the existing [acceptance tests](tests/acceptance) as a starting point for ch
 users can observe. They run real pytest commands in isolated projects to keep
 repository configuration out of each run. Use [unit tests](tests/unit) for focused logic.
 
+Keep unit tests independent of the filesystem where possible, testing inventory validation
+directly with Python values. File parsing and loading are covered by the acceptance tests.
+Acceptance-test configuration also includes pytest settings such as marker registration.
+Put those settings in real configuration files alongside the requirement inventory.
+
 Run the relevant test file while working:
 
 ```sh

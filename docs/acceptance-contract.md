@@ -52,15 +52,20 @@ containing Unicode, spaces or punctuation.
 | Test file | What a user can rely on |
 | --- | --- |
 | `test_configuration.py` | Only the two supported files supply requirement inventories; conflicts are explained. |
-| `test_requirements.py` | Arbitrary IDs, several requirements per test, parameterized cases, inherited markers, no double counting, invalid marker and configuration rejection. |
+| `test_requirements.py` | Arbitrary IDs, several requirements per test, parameterized cases, inherited markers, no double counting and invalid marker rejection. |
 | `test_statuses.py` | Execution statuses, setup/teardown errors and XFAILs, fixture skips, strict and non-strict XPASS, assertion text containing XPASS, and aggregation precedence. |
 | `test_selection.py` | Deselected tests retain their identities; missing or uncollected tests are MISSING. |
 | `test_cli.py` | Normal pytest, strict enforcement, acceptance-only selection, unmarked outcomes, and collection errors. |
 | `test_reporting.py` | Terminal status/counts, JSON node IDs/outcomes, and coverage based on requirements. |
 
-Tests invoke the installed plugin through pytest, without importing its internal
-modules. Small helper fixtures only create user projects and read JSON files.
-Unit tests cover domain edge cases alongside these user-facing scenarios.
+Tests invoke the installed plugin through real pytest subprocesses.
+Configuration tests use `file_project` and create the actual configuration files.
+Behavior tests use `user_project`, which writes a real `pyproject.toml` inventory.
+Both setups exercise normal configuration loading, validation, collection, execution and reporting.
+Other pytest settings, such as marker registration, also use real configuration files.
+
+Unit tests validate inventories directly using Python values, independently of pytest configuration
+and the filesystem. File parsing and loading errors are covered by configuration acceptance tests.
 
 ## JSON contract
 

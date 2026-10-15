@@ -1,4 +1,4 @@
-"""Read requirement inventories from the two supported project files."""
+"""Validate requirement inventories independently of their project-file source."""
 
 import configparser
 import sys
@@ -44,16 +44,20 @@ def load_requirements(config: pytest.Config) -> list[str]:
     if not inventories:
         return []
 
-    filename, requirements = next(iter(inventories.items()))
+    source, requirements = next(iter(inventories.items()))
+    return _validate_inventory(requirements, source)
+
+
+def _validate_inventory(requirements: object, source: str) -> list[str]:
     if not isinstance(requirements, list) or any(
         not isinstance(requirement, str) for requirement in requirements
     ):
-        raise pytest.UsageError(f"{filename}: requirements must be a list of string IDs")
+        raise pytest.UsageError(f"{source}: requirements must be a list of string IDs")
 
     seen: set[str] = set()
     for requirement in requirements:
         if requirement in seen:
-            raise pytest.UsageError(f"{filename}: duplicate requirements ID {requirement!r}")
+            raise pytest.UsageError(f"{source}: duplicate requirements ID {requirement!r}")
 
         seen.add(requirement)
 

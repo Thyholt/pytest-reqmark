@@ -6,7 +6,6 @@ from tests.acceptance.expectations import expected
 from tests.acceptance.scenarios.requirements import (
     class_markers,
     invalid_deselected_marker,
-    invalid_inventory,
     multiple_requirements,
     parameterized_cases,
     repeated_marker,
@@ -134,18 +133,3 @@ def test_invalid_markers_are_rejected_even_when_the_test_is_deselected(user_proj
     assert result.ret != pytest.ExitCode.OK
     message = result.stdout.str() + result.stderr.str()
     assert "UNKNOWN" in message
-
-
-@pytest.mark.parametrize("inventory", ['"REQ-001"', "[123]", '["REQ-001", "REQ-001"]'])
-def test_invalid_requirement_configuration_is_rejected(user_project, inventory):
-    project = user_project([], invalid_inventory)
-    (project.path / "pyproject.toml").write_text(
-        f"[tool.xspec]\nrequirements = {inventory}\n", encoding="utf-8"
-    )
-
-    result = project.runpytest_subprocess("--xspec-report")
-
-    assert result.ret != pytest.ExitCode.OK
-    message = result.stdout.str() + result.stderr.str()
-    assert "unrecognized arguments" not in message.lower()
-    assert "requirements" in message.lower()
