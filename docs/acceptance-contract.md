@@ -55,6 +55,7 @@ containing Unicode, spaces or punctuation.
 | `test_requirements.py` | Arbitrary IDs, several requirements per test, parameterized cases, inherited markers, no double counting and invalid marker rejection. |
 | `test_statuses.py` | Execution statuses, setup/teardown errors and XFAILs, fixture skips, strict and non-strict XPASS, assertion text containing XPASS, and aggregation precedence. |
 | `test_selection.py` | Deselected tests retain their identities; missing or uncollected tests are MISSING. |
+| `test_requirement_selection.py` | Exact requirement selection, discovery, native filters, shared evidence and report scope preserve full-inventory strict verification. |
 | `test_cli.py` | Normal pytest, strict enforcement, acceptance-only selection, unmarked outcomes, and collection errors. |
 | `test_reporting.py` | Terminal status/counts, JSON node IDs/outcomes, and coverage based on requirements. |
 

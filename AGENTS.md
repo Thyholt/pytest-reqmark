@@ -284,6 +284,7 @@ underlying issue goes away (model upgrades, refactors, process changes).
 - Read `.codex/config.toml` before selecting skills and honor `enabled = false`;
   use enabled project workflows instead of disabled home-level workflows.
 - Keep pull request descriptions short, covering the change and essential validation.
+- Keep `tasks/plan.md` and `tasks/todo.md` local and out of commits.
 - Keep README guidance focused on what users learn from runnable public examples.
   For terminology edits, preserve its structure, examples and public configuration keys.
   Run example commands from the repository root, without `cd` or `--project`.
