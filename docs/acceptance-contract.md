@@ -55,6 +55,7 @@ containing Unicode, spaces or punctuation.
 | `test_requirements.py` | Arbitrary IDs, several requirements per test, parameterized cases, inherited markers, no double counting and invalid marker rejection. |
 | `test_statuses.py` | Execution statuses, setup/teardown errors and XFAILs, fixture skips, strict and non-strict XPASS, assertion text containing XPASS, and aggregation precedence. |
 | `test_selection.py` | Deselected tests retain their identities; missing or uncollected tests are MISSING. |
+| `test_requirement_selection.py` | Exact requirement selection, discovery, native filters, shared evidence and report scope preserve full-inventory strict verification. |
 | `test_cli.py` | Normal pytest, strict enforcement, acceptance-only selection, unmarked outcomes, and collection errors. |
 | `test_reporting.py` | Terminal status/counts, JSON node IDs/outcomes, and coverage based on requirements. |
 
@@ -144,6 +145,63 @@ without executing their test modules. Scenario leaf folders have empty
 The harness copies each package directory into an isolated pytest project.
 The outer test collection excludes the scenario directory, so deliberately
 failing examples run only inside their acceptance scenarios.
+
+## Requirement selection and discovery (#15)
+
+The user approved this section and `test_requirement_selection.py` before plugin implementation.
+The existing v0.1 contract above remains unchanged without selection.
+
+Repeat `--xspec-select=ID` to select the union of exact, opaque requirement IDs. Repeated IDs and
+overlapping markers never duplicate a test. Commas, spaces and Unicode belong to the ID, with no
+splitting or prefix matching. Unmarked tests are excluded. Pytest collection paths, `-k` and `-m`
+intersect with requirement selection. Associations are recorded before filtering, and normal
+pytest deselection notifications preserve excluded test identities and all shared associations.
+Module and class markers apply to each complete parameterized node ID.
+
+`--collect-only -q` lists the same selected node IDs as execution, without running fixtures or test
+bodies. Collected modules still import and need their normal dependencies. Collection errors keep
+verification unsuccessful. Invalid collected markers remain errors even when filters exclude them.
+Unknown selected IDs produce a usage error (exit code 4) identifying the ID, before fixtures or
+tests execute, including mixed known and unknown selections.
+
+A declared requirement with no associated collected tests is `MISSING`, with an empty test list.
+If native filters remove its associated tests, those tests remain `DESELECTED`. Both cases remain
+unverified. An empty selection preserves pytest's exit code 5 without strict mode. Strict mode
+continues to evaluate every declared requirement and returns exit code 1 for unverified results.
+Discovery preserves test identities as `SKIPPED`, never passing evidence. Unselected requirements
+remain in reports and the coverage denominator, including any evidence shared with selected ones.
+Tests outside collected paths have no invented identities or deselected records.
+
+When selection is active, JSON adds one top-level `scope` object. Existing result fields stay intact:
+
+```json
+{
+  "selected_requirements": ["REQ-002", "REQ-001"],
+  "collection_paths": ["test_behavior.py"],
+  "keyword_expression": "shared",
+  "marker_expression": "xspec",
+  "collect_only": false
+}
+```
+
+Selected IDs retain first-occurrence order with duplicates removed. Collection paths are pytest's
+effective collection arguments, including explicit node IDs, in their original order. With no
+explicit paths, pytest uses configured `testpaths`, or `["."]` when none are configured. Absent
+`-k` and `-m` expressions are empty strings. `collect_only` is a boolean. Without requirement
+selection, the `scope` key and terminal scope lines are absent.
+
+With `--xspec-report` or `--xspec-strict`, terminal reports add the same scope information:
+
+```text
+Selected requirements: ["REQ-002", "REQ-001"]
+Collection paths: ["test_behavior.py"]
+Keyword filter: shared
+Marker filter: xspec
+Discovery only: no
+```
+
+Arrays use JSON notation to preserve opaque IDs, and empty filter expressions display `(none)`.
+Discovery displays `yes`. Requirement counts and coverage continue to describe the entire inventory.
 
 ## Verification
 

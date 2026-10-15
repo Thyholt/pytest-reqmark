@@ -74,6 +74,41 @@ The first report shows the example above; the second shows a specification witho
 
 ![Terminal reports showing verified specifications in green and a missing specification in red.](https://raw.githubusercontent.com/Thyholt/pytest-xspec/master/docs/images/terminal-reports.png)
 
+### Select specifications
+
+Use `--xspec-select=ID` to run tests linked to one specification. Repeat the option
+to select several specifications. A test linked to several selected IDs runs once.
+
+```sh
+pytest --xspec-select=REQ-001
+pytest --xspec-select=REQ-001 --xspec-select=REQ-002
+```
+
+Each option takes one exact ID, including any spaces or commas. Quote IDs when the
+shell requires it. Unmarked tests are excluded. Collection paths, `-k` and `-m`
+further narrow the selection. An undeclared selected ID is a usage error.
+Selecting only IDs without matching tests produces an empty selection.
+
+Strict mode still evaluates every declared specification. Selecting one ID keeps
+other specifications in the report and the coverage calculation. Excluded tests
+remain `DESELECTED`, and tests shared with other specifications keep all their links.
+With selection active, terminal reports and the JSON `scope` field show selected
+IDs, collection paths, `-k`, `-m` and whether the run only discovers tests.
+
+### Discover tests without running them
+
+Add `--collect-only -q` to list the selected test IDs, including parameterized cases.
+
+```sh
+pytest --xspec-select=REQ-001 --collect-only -q
+```
+
+Discovery runs neither fixtures nor test bodies. It still imports collected modules,
+which need their normal dependencies. Reports mark discovered tests as `SKIPPED`,
+so discovery does not verify their specifications. Strict mode fails when any
+specification remains unverified. Without strict mode, an empty selection keeps
+pytest's no-tests exit code, 5.
+
 ### Read specification statuses
 
 Reports label specifications as requirements.
@@ -149,6 +184,19 @@ uv run --locked pytest examples/quickstart --xspec-strict
 
 For `acceptance_only`, add `-m xspec` to run only the marked test.
 Without that filter, the unmarked test makes pytest fail.
+
+### Select and discover example tests
+
+Use the same example command with `--xspec-select=REQ-001` to select the pizza test.
+Add `--collect-only -q` to discover it without running it:
+
+```sh
+uv run --locked pytest examples/quickstart --xspec-select=REQ-001 --collect-only -q
+```
+
+For `missing_requirement`, repeat `--xspec-select=REQ-002` to select both declared IDs.
+Only the existing sock test runs. With `--xspec-strict`, the missing sock still
+makes verification fail.
 
 ### Inspect the JSON report
 
