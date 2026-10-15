@@ -1,0 +1,5 @@
+owner = "Document owner"
+requirements = [
+    { id = "REQ-002", description = "", rationale = "", priority = 1 },
+    { id = "REQ-001" },
+]

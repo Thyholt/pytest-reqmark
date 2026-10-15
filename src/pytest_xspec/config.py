@@ -43,10 +43,47 @@ def load_requirements(config: pytest.Config) -> list[str]:
         raise pytest.UsageError("Declare requirements in only one of pyproject.toml and pytest.ini")
 
     if not inventories:
-        return []
+        document = config.rootpath / "xspec.toml"
+        if not document.is_file():
+            return []
+
+        try:
+            toml = import_module("tomllib" if sys.version_info >= (3, 11) else "tomli")
+            with document.open("rb") as stream:
+                requirements = toml.load(stream).get("requirements")
+        except (OSError, ValueError) as error:
+            raise pytest.UsageError(
+                f"Cannot read xspec requirements from {document.name}: {error}"
+            ) from error
+
+        return _validate_document(requirements, document.name)
 
     source, requirements = next(iter(inventories.items()))
     return _validate_inventory(requirements, source)
+
+
+def _validate_document(requirements: object, source: str) -> list[str]:
+    if not isinstance(requirements, list):
+        raise pytest.UsageError(f"{source}: requirements must be a list of tables")
+
+    identifiers: list[str] = []
+    for position, requirement in enumerate(requirements, start=1):
+        if not isinstance(requirement, dict):
+            raise pytest.UsageError(f"{source}: requirement {position} must be a table")
+
+        identifier = requirement.get("id")
+        if not isinstance(identifier, str):
+            raise pytest.UsageError(f"{source}: requirement {position} must have a string id")
+
+        for field in ("description", "rationale"):
+            if field in requirement and not isinstance(requirement[field], str):
+                raise pytest.UsageError(
+                    f"{source}: requirement {identifier!r}: {field} must be a string"
+                )
+
+        identifiers.append(identifier)
+
+    return _validate_inventory(identifiers, source)
 
 
 def _validate_inventory(requirements: object, source: str) -> list[str]:

@@ -247,7 +247,8 @@ behavior tests with skips or xfails.
 - Keep unit tests independent of the filesystem where possible, testing validation directly.
   Cover file parsing and loading in acceptance tests.
 - Preserve the specification and accepted user corrections as the behavioral contract.
-- Support requirement configuration only in `pyproject.toml` or `pytest.ini`.
+- Support requirement inventories in `pyproject.toml` or `pytest.ini`, with `xspec.toml`
+  as a fallback only when neither declares an inventory.
 - Zero declared requirements means acceptance success with zero requirements.
 - Acceptance verification ignores unmarked test outcomes; ordinary pytest exit behavior remains.
 - Python style follows ruff: Python 3.10 target, 100-character lines and sorted imports.

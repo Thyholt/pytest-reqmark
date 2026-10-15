@@ -1,10 +1,10 @@
 # Acceptance contract
 
-These executable acceptance requirements define the implemented v0.1 behavior.
-The v0.1 specification uses the agreed project name in
+These executable acceptance requirements define the supported behavior, including
+the specification-document extension to the original v0.1 specification in
 [specification-v0.1.md](specification-v0.1.md).
 
-## Configuration: two supported files
+## Configuration: explicit inventories and a fallback document
 
 Declare opaque requirement IDs in either:
 
@@ -22,12 +22,37 @@ xspec =
     REQ-002
 ```
 
+When neither file declares an inventory, read `xspec.toml` from pytest's project root:
+
+```toml
+[[requirements]]
+id = "REQ-001"
+description = "A short statement of the requirement."
+rationale = "Why the requirement matters."
+
+[[requirements]]
+id = "REQ-002"
+```
+
+The document is an array of requirement tables. Each entry requires a string `id`.
+Descriptions and rationales are optional strings and may be empty. Unknown fields
+are ignored. Only IDs enter verification and reports, preserving the existing report schema.
+Equivalent TOML syntax, including inline tables inside an array, is accepted.
+
 Accepted configuration decisions:
 
 - `xspec` uses one ID per line in `pytest.ini`.
 - If both files declare inventories, fail with a message naming both files rather
   than merge them or silently choose one. A `pytest.ini` without an inventory can
   coexist with an inventory in `pyproject.toml`.
+- An explicitly empty inventory in either file also disables the document fallback.
+  When an inventory is declared, `xspec.toml` is not opened or validated. Invalid
+  existing configuration remains an error rather than triggering fallback.
+- An existing configuration file without an inventory does not disable the fallback.
+  The document is read from the project root regardless of the working directory.
+- `requirements = []` in `xspec.toml` declares zero requirements. A selected document
+  without `requirements`, including an empty file, is rejected. Invalid document
+  syntax or contents produce a configuration error naming `xspec.toml` before tests run.
 - No inventory is read from `setup.cfg`, `tox.ini`, JSON, YAML or other files.
   Ordinary pytest may still use its own supported configuration files.
 - Duplicate IDs and non-string IDs are rejected. Each `xspec` marker takes exactly
@@ -51,7 +76,8 @@ containing Unicode, spaces or punctuation.
 
 | Test file | What a user can rely on |
 | --- | --- |
-| `test_configuration.py` | Only the two supported files supply requirement inventories; conflicts are explained. |
+| `test_configuration.py` | Explicit inventories retain precedence, including empty or invalid inventories; conflicts are explained. |
+| `test_specification_document.py` | The fallback document supplies IDs without reporting metadata; source selection, document errors and zero requirements are explained. |
 | `test_requirements.py` | Arbitrary IDs, several requirements per test, parameterized cases, inherited markers, no double counting and invalid marker rejection. |
 | `test_statuses.py` | Execution statuses, setup/teardown errors and XFAILs, fixture skips, strict and non-strict XPASS, assertion text containing XPASS, and aggregation precedence. |
 | `test_selection.py` | Deselected tests retain their identities; missing or uncollected tests are MISSING. |
@@ -64,8 +90,10 @@ Behavior tests use `user_project`, which writes a real `pyproject.toml` inventor
 Both setups exercise normal configuration loading, validation, collection, execution and reporting.
 Other pytest settings, such as marker registration, also use real configuration files.
 
-Unit tests validate inventories directly using Python values, independently of pytest configuration
-and the filesystem. File parsing and loading errors are covered by configuration acceptance tests.
+Unit tests validate inventories and document contents directly using Python values,
+independently of pytest configuration and the filesystem. File parsing and loading
+are covered by configuration acceptance tests. TOML test data lives in lintable
+files, with deliberately malformed syntax in `.toml.invalid` files.
 
 ## JSON contract
 
@@ -131,8 +159,8 @@ option cannot masquerade as marker validation. Aggregation is verified in both
 test collection orders. A test linked to several requirements must appear in
 every declared requirement's result.
 
-Unknown marked IDs are rejected even for empty inventories in either supported
-format and when configuration is absent. Unsupported inventory files are ignored
+Unknown marked IDs are rejected even for empty inventories and when configuration
+is absent. Unsupported inventory files are ignored
 for unmarked projects, yielding successful zero-requirement verification.
 Association tests assert complete node-ID/outcome records, including ordering
 and duplicate detection. Each outcome and precedence scenario keeps its source
