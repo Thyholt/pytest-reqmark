@@ -30,7 +30,19 @@ class Summary(TypedDict):
     collection_errors: int
 
 
-class Report(TypedDict):
+class SelectionScope(TypedDict):
+    selected_requirements: list[str]
+    collection_paths: list[str]
+    keyword_expression: str
+    marker_expression: str
+    collect_only: bool
+
+
+class _OptionalScope(TypedDict, total=False):
+    scope: SelectionScope
+
+
+class Report(_OptionalScope):
     requirements: dict[str, RequirementResult]
     summary: Summary
 
@@ -39,6 +51,8 @@ def build_report(
     requirements: Mapping[str, Sequence[str]],
     outcomes: Mapping[str, str | None],
     collection_errors: int,
+    *,
+    scope: SelectionScope | None = None,
 ) -> Report:
     results: dict[str, RequirementResult] = {}
 
@@ -54,7 +68,7 @@ def build_report(
     count = len(results)
     passed = sum(result["status"] == "PASSED" for result in results.values())
 
-    return {
+    report: Report = {
         "requirements": results,
         "summary": {
             "requirements": count,
@@ -65,6 +79,11 @@ def build_report(
             "collection_errors": collection_errors,
         },
     }
+
+    if scope is not None:
+        report["scope"] = scope
+
+    return report
 
 
 def write_json(report: Report, path: Path) -> None:
@@ -77,6 +96,20 @@ def write_json(report: Report, path: Path) -> None:
 def write_terminal(report: Report, terminal: TerminalReporter) -> None:
     red = not report["summary"]["verified"]
     terminal.write_sep("=", "xspec", red=red, green=not red)
+
+    if "scope" in report:
+        scope = report["scope"]
+        for label, value in (
+            (
+                "Selected requirements",
+                json.dumps(scope["selected_requirements"], ensure_ascii=False),
+            ),
+            ("Collection paths", json.dumps(scope["collection_paths"], ensure_ascii=False)),
+            ("Keyword filter", scope["keyword_expression"] or "(none)"),
+            ("Marker filter", scope["marker_expression"] or "(none)"),
+            ("Discovery only", "yes" if scope["collect_only"] else "no"),
+        ):
+            terminal.write_line(f"{label}: {value}", red=red, green=not red)
 
     width = max([len("Requirement"), *(len(identifier) for identifier in report["requirements"])])
     terminal.write_line(f"{'Requirement':<{width}}  {'Status':<10}  Tests", red=red, green=not red)

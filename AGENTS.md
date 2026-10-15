@@ -286,6 +286,9 @@ underlying issue goes away (model upgrades, refactors, process changes).
 - Read `.codex/config.toml` before selecting skills and honor `enabled = false`;
   use enabled project workflows instead of disabled home-level workflows.
 - Keep pull request descriptions short, covering the change and essential validation.
+- Update verified acceptance checkboxes before closing issues, and record agreed scope changes
+  explicitly instead of marking superseded criteria as implemented.
+- Keep `tasks/plan.md` and `tasks/todo.md` local and out of commits.
 - Keep README guidance focused on what users learn from runnable public examples.
   Present its motivation as one connected argument through engineering principles,
   without naming specific development methods.
@@ -314,6 +317,8 @@ underlying issue goes away (model upgrades, refactors, process changes).
 - A rejected acceptance input must produce a domain diagnostic; an unrecognized
   CLI option is not evidence that marker or inventory validation works.
 - Check aggregation in both test collection orders to catch first-result shortcuts.
+- Observe scenario execution through stdout, and pair every no-execution check with a positive
+  execution check so missing instrumentation cannot make the test pass.
 - Keep acceptance expectations local and example behavior in named, lintable Python
   scenario files; do not import scenarios from other test modules or generate
   test bodies through substitutions and fallbacks. Exclude scenario files from
