@@ -241,6 +241,14 @@ uv run --locked pytest examples/test_examples.py -n 0
 All six checks should pass, including checks for the examples that deliberately
 fail. The examples are also verified in CI.
 
+## Development disclosure
+
+This package is developed by AI agents under human direction.
+See [AI_DISCLOSURE.md](AI_DISCLOSURE.md) for details on authorship, human review
+and repository workflows.
+
+This README was written by AI.
+
 ## Contributing
 
 See [CONTRIBUTING.md][contributing] for setup, tests and pull requests.
