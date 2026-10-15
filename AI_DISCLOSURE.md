@@ -10,7 +10,7 @@ Agents also commit code, create pull requests, create releases and perform other
 repository tasks when instructed by humans.
 
 This is the future of software development, and humans should to embrace it.
-Working this way lets humans focus on understanding problems, defining intent, judging resuls and
+Working this way lets humans focus on understanding problems, defining intent, judging results and
 solving needs.
 
 This was written by AI.
