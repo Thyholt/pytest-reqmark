@@ -7,6 +7,7 @@ These principles define the responsibility boundaries of pytest-xspec.
   IDs as opaque references and leaves test organization to users.
 - **The library operates at pytest's boundary.** Its inputs are specification declarations,
   configuration and command-line options, and pytest's collected test associations and outcomes.
+  Saved execution records preserve that boundary when independent runs are assessed together.
   Test bodies and fixtures translate domain behavior into pytest outcomes. The library
   neither inspects their implementations nor introduces a separate execution-outcome protocol.
 - **Domain evidence stays with domain infrastructure.** Measurements, artifacts and logs
@@ -19,6 +20,8 @@ These principles define the responsibility boundaries of pytest-xspec.
 - **Specification content has one source.** Descriptions, rationale and domain metadata
   belong in users' specifications. Results reference requirements by ID so consumers can
   combine specifications and results without duplicating that content in the library's output.
+  Execution context records observed identities and provenance references supplied by testing
+  infrastructure. It does not copy requirement descriptions or collect the underlying evidence.
 - **Feedback is generic, interpretation is domain-owned.** pytest-xspec provides structured
   results and terminal feedback. Consumers use those results to produce domain-specific
   reports and make compliance or release decisions.

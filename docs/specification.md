@@ -265,3 +265,83 @@ Contributor commands are maintained in [CONTRIBUTING.md](../CONTRIBUTING.md#chec
 | [Requirement selection and discovery](../tests/acceptance/test_requirement_selection.py) | Exact selection, native filters, shared results, scope and full-inventory verification. |
 | [CLI](../tests/acceptance/test_cli.py) | Plain pytest, strict enforcement, unmarked outcomes and collection errors. |
 | [Reporting](../tests/acceptance/test_reporting.py) | Terminal feedback, JSON records, requirement coverage and verdicts. |
+
+## Independent executions and verification plans
+
+`--xspec-spec=PATH` selects a shared TOML specification explicitly, taking precedence over
+project-local inventories. Relative paths resolve from the invocation directory. Requirement
+entries may declare a string `parent` referencing another declared requirement. Parent links
+must be acyclic. They never propagate verification status.
+
+`--xspec-context=PATH` reads an execution declaration before collection. It requires a nonempty
+`suite` string and a `context` table of string values. An optional `provenance` table contains
+string references supplied by testing infrastructure. Other tables are ignored. Invalid context
+or parent declarations produce usage errors before fixtures or test bodies run.
+
+With execution context, JSON adds `execution`, containing schema version 1, a fresh UUID `id`,
+`suite`, UTC ISO `started_at` and `finished_at`, and the supplied `context` and `provenance`.
+Without context the existing report schema is unchanged. Measurements and instrument interaction
+remain outside the package. Recording a context does not authenticate its source.
+When a TOML specification is selected, `execution.specification` records its SHA-256 content
+digest. Assessment compares that digest with the selected plan, exposing a mismatch as
+`execution.specification` alongside context mismatches. Records without a baseline cannot satisfy
+the plan automatically. Any specification edit conservatively changes the baseline; exact scoped
+reuse can accept a reviewed change without rewriting the original digest or outcomes.
+
+### Verification obligations
+
+A specification can declare `configurations`, an array of tables with unique nonempty `id` and
+string-valued `context`, and `obligations`, an array with unique nonempty `id`, a declared
+`requirement`, a nonempty `suite`, and a declared `configuration`. Every declared requirement
+must have at least one obligation in an assessment plan. Configurations without obligations are
+optional. Requirement descriptions and rationales remain in the specification.
+
+The assessment target is a TOML document with nonempty `id` and string-valued `context`.
+An optional `configurations` table overrides context fields for named declared configurations.
+Expected context combines configuration defaults, global target context and target-specific
+configuration overrides, in that order. All expected fields must match exactly; extra recorded
+fields are retained. The package assigns no domain meaning to context keys or values.
+
+### Assess saved runs
+
+`python -m pytest_xspec assess SPEC --target TARGET [--json PATH] [--markdown PATH] REPORT...`
+reads saved execution reports without collecting or executing tests. Input shape, outcomes,
+execution metadata and declared references are validated. Ordinary reports without execution
+metadata cannot be used for contextual assessment. Summary verdicts and percentages are not
+used as evidence; statuses are derived from original individual pytest outcomes.
+
+Each obligation considers every supplied execution from its suite that contains tests associated
+with its requirement. Context mismatches remain visible alongside the original outcomes and
+identity. Applicable outcomes aggregate with the existing test-outcome precedence. With no
+applicable tests an obligation is INAPPLICABLE if mismatching candidates exist, otherwise MISSING.
+Applicable SKIPPED, DESELECTED, XFAILED and XPASSED outcomes do not verify an obligation.
+A missing entry in one partial report does not override executions from another suite.
+
+Repeated identical execution IDs are deduplicated. Different content under the same execution
+ID is an input error. Distinct executions retain their identities even when pytest node IDs
+match. All supplied applicable executions participate, without implicit first/latest/pass choice.
+Unknown requirement references and inconsistent outcomes for a shared test identity are rejected.
+All supplied collection errors prevent complete verification.
+
+Assessment JSON contains the target ID, specification path, requirement statuses, each obligation
+and its expected context, individual candidate tests with execution identity, source path, original
+context, provenance, timestamps, outcome, applicability, mismatches and any reuse decision.
+It also includes source executions, including those with collection errors or no associated tests.
+The summary counts obligations, passed and unverified obligations, coverage and collection errors.
+Its status is COMPLETE only when every obligation passes and there are no collection errors,
+FAILED for applicable ERROR/FAILED/XPASSED or collection errors, and INCOMPLETE otherwise.
+Unrepresented requirements never become verified through parent links.
+
+The command returns 0 for COMPLETE, 1 for INCOMPLETE/FAILED, and 4 for invalid declarations,
+execution records or inaccessible input/output files. It prints the verdict, obligations and
+mismatch reasons. Optional Markdown renders the same generic verification information. These
+conclusions express satisfaction of declared rules, not product safety or release authorization.
+
+### Explicit evidence reuse
+
+A target may declare `reuse` tables containing the exact target `id`, execution UUID, obligation
+ID, nonempty `author` and nonempty `reason`. The referenced execution must be supplied and contain
+tests from the obligation's suite and requirement. Duplicate or incorrectly scoped decisions are
+rejected. A decision accepts context mismatches only for that target/execution/obligation tuple.
+Original identities, outcomes, context and mismatch details remain unchanged and visible.
+Reuse cannot turn a failing, skipped, deselected or unexecuted test into passing verification.

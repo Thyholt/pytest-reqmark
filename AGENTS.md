@@ -325,6 +325,8 @@ underlying issue goes away (model upgrades, refactors, process changes).
 - Read `.codex/config.toml` before selecting skills and honor `enabled = false`;
   use enabled project workflows instead of disabled home-level workflows.
 - Keep discussion-only turns read-only until the user requests edits.
+- For challenge-driven implementation, write the full example against intended APIs, then
+  acceptance tests, then package support. Never reduce the challenge to existing functionality.
 - Create commits only when the user explicitly requests a commit. Approval to implement changes
   does not authorize committing them.
 - Keep pull request descriptions short, covering the change and essential validation.

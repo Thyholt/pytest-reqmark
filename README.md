@@ -225,6 +225,121 @@ A document without `requirements`, including an empty file, is a configuration e
 Invalid documents produce an error before tests run.
 If no source exists, there are zero declared specifications.
 
+## Verify across suites and configurations
+
+A passing test result can belong to a different build or configuration from the one you need.
+Declare the required combinations, record each independent run, and assess the saved results.
+pytest-xspec retains the original outcomes and explains which evidence is missing or inapplicable.
+
+The [MediFlow example](examples/medical_verification/README.md) demonstrates the complete workflow:
+
+```sh
+uv run --locked python examples/medical_verification/run.py
+```
+
+Open `examples/medical_verification/results/report.md` after running it. The report links to
+individual assessments, execution records and simulated measurements.
+
+| Scenario | Result | Explanation |
+| --- | --- | --- |
+| Release 3.1 | COMPLETE | Both hardware revisions have passing evidence. |
+| Release 3.2 | INCOMPLETE | B system evidence belongs to the previous artifact. |
+| Release 3.3 | FAILED | B still delivers fluid after the required stop time. |
+| Equipment unavailable | INCOMPLETE | The B system test was deselected. |
+| Firmware changed | INCOMPLETE | Old firmware evidence does not match. |
+| Explicit firmware reuse | COMPLETE | A scoped, justified decision accepts the passing evidence. |
+| Physical evidence required | INCOMPLETE | Simulation results remain labelled as simulation. |
+
+### Declare verification obligations
+
+Keep requirements and their required configurations in one TOML specification. A parent link
+records refinement without inheriting verification from children.
+
+```toml
+[[requirements]]
+id = "REQ-001"
+
+[[configurations]]
+id = "linux"
+context = {os = "linux", environment = "simulation"}
+
+[[obligations]]
+id = "REQ-001-linux"
+requirement = "REQ-001"
+suite = "system"
+configuration = "linux"
+```
+
+A target TOML document supplies the artifact and any configuration changes for the assessment:
+
+```toml
+id = "build-42"
+
+[context]
+artifact = "sha256:your-build-digest"
+```
+
+Required obligations come from the specification, so an absent suite or configuration remains
+visible. A configuration without an obligation is optional and does not block verification.
+
+### Record and assess executions
+
+Each suite supplies its identity and observed execution context in a TOML document. Instrument
+and artifact references can accompany the context as provenance, while the measurements stay
+with your own testing infrastructure.
+
+```toml
+suite = "system"
+
+[context]
+artifact = "sha256:your-build-digest"
+os = "linux"
+environment = "simulation"
+
+[provenance]
+measurements = "artifacts/flow.csv"
+```
+
+Run the suite with `--xspec-spec=specification.toml`, `--xspec-context=execution.toml` and
+`--xspec-json=run.json`. Each report records a distinct execution identity and timestamps.
+The suites can run on different machines with different dependencies.
+When the inventory comes from a TOML specification, executions also record its content digest.
+Assessment requires the same specification baseline. A changed document, including an editorial
+change, needs new executions or an explicit reuse decision. Existing outcomes stay unchanged.
+
+Assess saved runs with the package command, independently of test collection or execution:
+
+```sh
+python -m pytest_xspec assess specification.toml --target target.toml \
+  --json assessment.json --markdown assessment.md run-software.json run-system.json
+```
+
+All applicable supplied executions contribute. A passing run cannot hide a supplied failure.
+Inapplicable executions retain their original outcomes and list the mismatched context fields.
+An obligation passes only when it has applicable tests and all of them pass. Collection errors
+prevent successful verification. Skipped, deselected and unexecuted tests remain unverified.
+
+The command returns 0 for COMPLETE, 1 for INCOMPLETE or FAILED, and 4 for invalid input.
+The ordinary single-run pytest workflow continues to work without these additional declarations.
+
+### Record an explicit reuse decision
+
+Evidence reuse requires a decision in the target document. Scope it to one execution, obligation
+and target, and record who authorized it and why:
+
+```toml
+[[reuse]]
+target = "build-42"
+execution = "original-execution-id"
+obligation = "REQ-001-linux"
+author = "Verification owner"
+reason = "Reviewed compatibility justification for this exact target and obligation."
+```
+
+Reuse does not rewrite the original artifact or turn a failed test into a passing test.
+pytest-xspec checks declared identities and outcomes. Your team owns compatibility decisions
+and the meaning and sufficiency of its evidence.
+
 ## Runnable examples
 
 Start with [the pizza][pizza], then try the other
@@ -239,6 +354,9 @@ Run the commands below from the repository root. Dependencies are installed auto
 | [Missing specification][missing-requirement] - A lost sock | `MISSING`, 50% coverage | 1 |
 | [Partial verification][partial-verification] - Cat skips a meeting | `SKIPPED`, 0% coverage | 1 |
 | [Acceptance only][acceptance-only] - Duck versus cheese | `PASSED` with `-m xspec` | 0 |
+
+The [MediFlow challenge](examples/medical_verification/README.md) explores evidence from separate
+runs and simulated releases, assessed by pytest-xspec against explicit verification obligations.
 
 ### Run an example
 
@@ -286,7 +404,7 @@ Check that every example behaves as described.
 uv run --locked pytest examples/test_examples.py -n 0
 ```
 
-All six checks should pass, including checks for the examples that deliberately
+All checks should pass, including checks for the examples that deliberately
 fail. The examples are also verified in CI.
 
 ## Development disclosure

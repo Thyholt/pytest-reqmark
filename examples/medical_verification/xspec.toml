@@ -1,0 +1,74 @@
+[[requirements]]
+id = "SYS-001"
+description = "After an occlusion, fluid delivery stops within 300 ms."
+
+[[requirements]]
+id = "SW-001"
+description = "Detect the occlusion within 150 ms."
+parent = "SYS-001"
+
+[[requirements]]
+id = "SW-002"
+description = "Issue a stop command within 50 ms of detection."
+parent = "SYS-001"
+
+[[requirements]]
+id = "HW-001"
+description = "On the controller bench, stop delivery within 100 ms of the command."
+parent = "SYS-001"
+
+[[configurations]]
+id = "A"
+context = {hardware = "A", firmware = "fw-a-1", environment = "simulation"}
+
+[[configurations]]
+id = "B"
+context = {hardware = "B", firmware = "fw-b-1", environment = "simulation"}
+
+[[obligations]]
+id = "SW-001-A"
+requirement = "SW-001"
+suite = "software"
+configuration = "A"
+
+[[obligations]]
+id = "SW-002-A"
+requirement = "SW-002"
+suite = "software"
+configuration = "A"
+
+[[obligations]]
+id = "HW-001-A"
+requirement = "HW-001"
+suite = "hardware"
+configuration = "A"
+
+[[obligations]]
+id = "SYS-001-A"
+requirement = "SYS-001"
+suite = "system"
+configuration = "A"
+
+[[obligations]]
+id = "SW-001-B"
+requirement = "SW-001"
+suite = "software"
+configuration = "B"
+
+[[obligations]]
+id = "SW-002-B"
+requirement = "SW-002"
+suite = "software"
+configuration = "B"
+
+[[obligations]]
+id = "HW-001-B"
+requirement = "HW-001"
+suite = "hardware"
+configuration = "B"
+
+[[obligations]]
+id = "SYS-001-B"
+requirement = "SYS-001"
+suite = "system"
+configuration = "B"
