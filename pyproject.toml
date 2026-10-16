@@ -88,6 +88,7 @@ allow-star-arg-any = true
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "FBT001"]
 "examples/**/test_*.py" = ["S101"]
+"examples/medical_verification/run.py" = ["S603"] # Fixed, shell-free local pytest command.
 
 [tool.rumdl]
 line-length = 100

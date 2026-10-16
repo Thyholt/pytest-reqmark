@@ -3,12 +3,25 @@
 import configparser
 import sys
 from importlib import import_module
+from pathlib import Path
 from typing import cast
 
 import pytest
 
+from pytest_xspec.declarations import document_identity, load_toml, validate_requirements
+
+SPECIFICATION: pytest.StashKey[str] = pytest.StashKey()
+
 
 def load_requirements(config: pytest.Config) -> list[str]:
+    explicit_spec = config.getoption("xspec_spec", default=None)
+    if explicit_spec is not None:
+        document = Path(explicit_spec)
+        if not document.is_absolute():
+            document = config.invocation_params.dir / document
+
+        return _load_document(document, config)
+
     inventories: dict[str, object] = {}
     pyproject = config.rootpath / "pyproject.toml"
     ini = config.rootpath / "pytest.ini"
@@ -47,43 +60,29 @@ def load_requirements(config: pytest.Config) -> list[str]:
         if not document.is_file():
             return []
 
-        try:
-            toml = import_module("tomllib" if sys.version_info >= (3, 11) else "tomli")
-            with document.open("rb") as stream:
-                requirements = toml.load(stream).get("requirements")
-        except (OSError, ValueError) as error:
-            raise pytest.UsageError(
-                f"Cannot read xspec requirements from {document.name}: {error}"
-            ) from error
-
-        return _validate_document(requirements, document.name)
+        return _load_document(document, config)
 
     source, requirements = next(iter(inventories.items()))
     return _validate_inventory(requirements, source)
 
 
+def _load_document(document: Path, config: pytest.Config) -> list[str]:
+    try:
+        requirements = load_toml(document).get("requirements")
+        config.stash[SPECIFICATION] = document_identity(document)
+    except (OSError, ValueError) as error:
+        raise pytest.UsageError(
+            f"Cannot read xspec requirements from {document.name}: {error}"
+        ) from error
+
+    return _validate_document(requirements, document.name)
+
+
 def _validate_document(requirements: object, source: str) -> list[str]:
-    if not isinstance(requirements, list):
-        raise pytest.UsageError(f"{source}: requirements must be a list of tables")
-
-    identifiers: list[str] = []
-    for position, requirement in enumerate(requirements, start=1):
-        if not isinstance(requirement, dict):
-            raise pytest.UsageError(f"{source}: requirement {position} must be a table")
-
-        identifier = requirement.get("id")
-        if not isinstance(identifier, str):
-            raise pytest.UsageError(f"{source}: requirement {position} must have a string id")
-
-        for field in ("description", "rationale"):
-            if field in requirement and not isinstance(requirement[field], str):
-                raise pytest.UsageError(
-                    f"{source}: requirement {identifier!r}: {field} must be a string"
-                )
-
-        identifiers.append(identifier)
-
-    return _validate_inventory(identifiers, source)
+    try:
+        return validate_requirements(requirements, source)
+    except ValueError as error:
+        raise pytest.UsageError(str(error)) from error
 
 
 def _validate_inventory(requirements: object, source: str) -> list[str]:

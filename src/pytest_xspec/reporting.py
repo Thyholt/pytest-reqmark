@@ -8,6 +8,7 @@ from typing import TypedDict
 import pytest
 from _pytest.terminal import TerminalReporter
 
+from pytest_xspec.execution import Execution
 from pytest_xspec.outcomes import aggregate
 
 
@@ -40,6 +41,7 @@ class SelectionScope(TypedDict):
 
 class _OptionalScope(TypedDict, total=False):
     scope: SelectionScope
+    execution: Execution
 
 
 class Report(_OptionalScope):

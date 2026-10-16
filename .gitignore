@@ -52,6 +52,7 @@ coverage.xml
 .pytest_cache/
 /examples/*/report.json
 !/examples/quickstart/report.json
+/examples/medical_verification/results/
 cover/
 
 # Translations
@@ -224,6 +225,8 @@ __marimo__/
 
 # Local Codex configuration
 /.codex/
+/tasks/plan.md
+/tasks/todo.md
 
 # Pinned shared skills and references; keep unrelated local skills private.
 /.agents/*

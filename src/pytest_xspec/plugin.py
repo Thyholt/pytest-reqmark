@@ -7,7 +7,8 @@ import pytest
 from _pytest.terminal import TerminalReporter
 
 from pytest_xspec.collector import requirement_ids
-from pytest_xspec.config import load_requirements
+from pytest_xspec.config import SPECIFICATION, load_requirements
+from pytest_xspec.execution import Execution, start_execution, timestamp
 from pytest_xspec.outcomes import aggregate, phase_outcome
 from pytest_xspec.reporting import SelectionScope, build_report, write_json, write_terminal
 
@@ -17,6 +18,8 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     group.addoption("--xspec-report", action="store_true", help="Print requirement verification")
     group.addoption("--xspec-strict", action="store_true", help="Fail on unverified requirements")
     group.addoption("--xspec-json", metavar="PATH", help="Write requirement verification as JSON")
+    group.addoption("--xspec-spec", metavar="PATH", help="Read a shared requirement specification")
+    group.addoption("--xspec-context", metavar="PATH", help="Attach execution context from TOML")
     group.addoption(
         "--xspec-select",
         action="append",
@@ -39,6 +42,15 @@ class RequirementPlugin:
         self.requirements: dict[str, list[str]] = {
             identifier: [] for identifier in load_requirements(config)
         }
+        context_path = config.getoption("xspec_context")
+        self.execution: Execution | None = (
+            start_execution(
+                config.invocation_params.dir / context_path,
+                specification=config.stash.get(SPECIFICATION, None),
+            )
+            if context_path
+            else None
+        )
         self.selected_requirements: list[str] = list(
             dict.fromkeys(config.getoption("xspec_select"))
         )
@@ -112,12 +124,18 @@ class RequirementPlugin:
                 )
 
     def pytest_sessionfinish(self, session: pytest.Session) -> None:
+        if self.execution is not None:
+            self.execution["finished_at"] = timestamp()
+
         report = build_report(
             self.requirements, self.outcomes, self.collection_errors, scope=self.scope
         )
 
         path = self.config.getoption("xspec_json")
         if path:
+            if self.execution is not None:
+                report["execution"] = self.execution
+
             write_json(report, Path(path))
 
         if (

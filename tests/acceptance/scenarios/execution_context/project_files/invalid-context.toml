@@ -1,0 +1,4 @@
+suite = "behavior-suite"
+
+[context]
+artifact = 123

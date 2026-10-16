@@ -1,0 +1,12 @@
+suite = "behavior-suite"
+
+[context]
+artifact = "build-1"
+configuration = "A"
+
+[provenance]
+kind = "simulation"
+adapter = "example-adapter-1"
+
+[device]
+arbitrary_numeric_value = 20
