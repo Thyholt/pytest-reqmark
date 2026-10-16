@@ -233,8 +233,7 @@ behavior tests with skips or xfails.
 - Source: `src/pytest_xspec/`.
 - User-facing acceptance scenarios: `tests/acceptance/`.
 - Test harness: root `conftest.py` and `tests/acceptance/conftest.py`.
-- Original design: `docs/specification-v0.1.md`.
-- Approved acceptance contract and extensions: `docs/acceptance-contract.md`.
+- Supported behavior and acceptance criteria: [specification](docs/specification.md).
 - CI: `.github/workflows/check.yml` and `.github/workflows/integration.yml`.
 - Generated environments and build artifacts are not hand-edited or committed.
 
@@ -253,10 +252,11 @@ Keep one owner for each kind of information:
 - README owns public usage and runnable examples. CONTRIBUTING.md owns contributor setup
   and workflow. `docs/releasing.md` owns package publishing steps. AGENTS.md owns agent
   instructions and coding/testing rules. Link to the owning document instead of copying it.
+- [Architectural principles](docs/architecture_principles.md) own library responsibility
+  boundaries. Refer to them when evaluating changes instead of restating them elsewhere.
 
-The specification is currently split between the original design and acceptance contract
-listed above. Read both, applying approved extensions and user corrections to the original
-design. Consolidation and creation of `CHANGELOG.md` are separate tasks.
+Read the living specification before changing plugin behavior. Creation of `CHANGELOG.md`
+remains a separate task.
 
 Follow the established skill-discovery mechanism when specifying, changing or releasing.
 Use the selected skills for detailed workflows and writing guidance. Do not prescribe
@@ -283,15 +283,12 @@ destructive commands or configuration for other agents.
 
 ### Project conventions and agreed workflow
 
-- Follow [CONTRIBUTING.md](CONTRIBUTING.md): substantial changes need runnable, realistic examples
-  of hard executable specification or feedback problems. Show expected results and general value.
-  For bugs, require a minimal reproduction, the command, and expected and actual results.
-- Let examples challenge existing assumptions. Prefer one coherent approach, and replace an inferior
-  design when evidence justifies it, including breaking changes with clear migration guidance.
+- Follow [CONTRIBUTING.md](CONTRIBUTING.md#proposing-changes) when proposing and evaluating changes.
 - Keep user-facing acceptance tests readable by a junior developer. Cover internal implementation
   details and exhaustive validation combinations in agent-owned unit tests.
 - Assert public outcomes through real pytest runs; avoid coupling acceptance tests to internals.
-- Acceptance tests run isolated user projects, with common setup in fixtures.
+- Acceptance tests run the installed plugin in real pytest subprocesses using isolated user
+  projects. Reuse the setup in [acceptance fixtures](tests/acceptance/conftest.py).
   Use real supported configuration files, including pytest settings such as marker registration.
 - Keep unit tests independent of the filesystem where possible, testing validation directly.
   Cover file parsing and loading in acceptance tests.
@@ -342,7 +339,7 @@ underlying issue goes away (model upgrades, refactors, process changes).
   Document the shared command once, and explain only the options that differ.
   Use `uv run --locked` to sync automatically without a separate setup command.
   Link generated example reports after the commands that create them.
-  Keep the acceptance contract and acceptance scenarios internal. Document package
+  Keep the specification and acceptance scenarios internal. Document package
   initializer and editor-navigation conventions in developer instructions.
 - Link CONTRIBUTING.md from README. Do not require contributors to read AGENTS.md.
   Link to tool and CI configuration instead of repeating their settings and checks.

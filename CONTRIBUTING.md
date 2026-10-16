@@ -1,7 +1,7 @@
 # Contributing
 
-pytest-xspec aims to do one thing exceptionally well: executable specifications and feedback. It
-connects requirements to tests and reports their results.
+Use the [architectural principles](docs/architecture_principles.md) to understand the library's
+responsibility boundaries when proposing changes.
 
 The goal is not to accumulate features, but to solve increasingly difficult problems in executable
 specifications and feedback exceptionally well.
@@ -73,9 +73,10 @@ and behavior. Update the source record and preserve the applicable licenses and 
 
 ## Make a change
 
-Use the existing [acceptance tests](tests/acceptance) as a starting point for changes users can
-observe. They run real pytest commands in isolated projects to keep repository configuration out of
-each run. Use [unit tests](tests/unit) for focused logic.
+Use the [specification](docs/specification.md) to identify supported behavior and the affected
+[acceptance tests](tests/acceptance). Update it when observable behavior changes. Acceptance tests
+run real pytest commands in isolated projects to keep repository configuration out of each run.
+Use [unit tests](tests/unit) for focused logic.
 
 Run the relevant test file while working:
 
