@@ -47,8 +47,8 @@ show_missing = true
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-# Preserve specification examples and the pinned upstream skill files.
-extend-exclude = ["docs/specification-v0.1.md", ".agents/skills"]
+# Preserve the pinned upstream skill files.
+extend-exclude = [".agents/skills"]
 
 [tool.ruff.lint]
 select = [
