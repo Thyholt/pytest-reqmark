@@ -47,8 +47,8 @@ show_missing = true
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-# Keep specification examples out of automated source formatting.
-extend-exclude = ["docs/specification-v0.1.md"]
+# Preserve specification examples and the pinned upstream skill files.
+extend-exclude = ["docs/specification-v0.1.md", ".agents/skills"]
 
 [tool.ruff.lint]
 select = [
@@ -91,6 +91,8 @@ allow-star-arg-any = true
 
 [tool.rumdl]
 line-length = 100
+# Preserve the pinned upstream prose without applying project formatting rules.
+exclude = [".agents/skills/**"]
 
 [tool.ty.environment]
 python-version = "3.10"

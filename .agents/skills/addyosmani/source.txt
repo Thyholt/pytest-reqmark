@@ -1,0 +1,5 @@
+https://github.com/addyosmani/agent-skills
+Commit: aeac41d4d005999432bb7312f7ff06383a91d59d
+Imported upstream paths: skills/, references/, LICENSE
+Local root: .agents/skills/addyosmani/
+Imported files are unchanged upstream copies.
