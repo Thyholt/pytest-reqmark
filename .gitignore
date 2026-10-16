@@ -224,4 +224,9 @@ __marimo__/
 
 # Local Codex configuration
 /.codex/
-/.agents/
+
+# Pinned shared skills and references; keep unrelated local skills private.
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/addyosmani/

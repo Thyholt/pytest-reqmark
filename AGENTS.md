@@ -29,6 +29,8 @@ These rules override everything else in this file when in conflict:
    and proceed.
 5. **Touch only what you must.** Every changed line must trace directly to the user's request. No
    drive-by refactors, reformatting, or "while I was in there" cleanups.
+6. **Preserve existing work.** Do not discard pre-existing changes or run destructive resets
+   without the user's explicit authorization.
 
 ---
 
@@ -231,10 +233,53 @@ behavior tests with skips or xfails.
 - Source: `src/pytest_xspec/`.
 - User-facing acceptance scenarios: `tests/acceptance/`.
 - Test harness: root `conftest.py` and `tests/acceptance/conftest.py`.
-- Specification: `docs/specification-v0.1.md`.
-- Proposed acceptance contract: `docs/acceptance-contract.md`.
+- Original design: `docs/specification-v0.1.md`.
+- Approved acceptance contract and extensions: `docs/acceptance-contract.md`.
 - CI: `.github/workflows/check.yml` and `.github/workflows/integration.yml`.
 - Generated environments and build artifacts are not hand-edited or committed.
+
+### Specification, changelog and release descriptions
+
+Keep one owner for each kind of information:
+
+- The specification describes current behavior, its purpose and acceptance criteria.
+  Maintain one living specification, with acceptance tests as executable verification.
+  Keep it readable without requiring readers to inspect Git history. Do not create a
+  separate specification for each release.
+- `CHANGELOG.md` records user-visible changes between versions. Collect pending entries
+  under `Unreleased`; use the selected skills for writing and organization guidance.
+- GitHub release descriptions present the published version's changelog entry and link
+  to relevant usage documentation. Reuse the entry so migration guidance stays consistent.
+- README owns public usage and runnable examples. CONTRIBUTING.md owns contributor setup
+  and workflow. `docs/releasing.md` owns package publishing steps. AGENTS.md owns agent
+  instructions and coding/testing rules. Link to the owning document instead of copying it.
+
+The specification is currently split between the original design and acceptance contract
+listed above. Read both, applying approved extensions and user corrections to the original
+design. Consolidation and creation of `CHANGELOG.md` are separate tasks.
+
+Follow the established skill-discovery mechanism when specifying, changing or releasing.
+Use the selected skills for detailed workflows and writing guidance. Do not prescribe
+particular skill names or duplicate discovery rules, templates, category lists or
+checklists in project documents.
+
+Use the repository's bundled workflow skillset as described in
+[CONTRIBUTING.md](CONTRIBUTING.md#ai-assisted-contributions). Project instructions and agreed
+scope take precedence over upstream examples. Resolve resource paths against the installed
+bundle and use available Codex tools. Skill examples do not authorize external installations,
+destructive commands or configuration for other agents.
+
+1. **Specifying:** Define intended behavior and success criteria before plugin implementation.
+   Update the specification when agreed scope or decisions change. Write readable acceptance
+   tests and obtain the user's explicit approval before implementing the plugin behavior.
+2. **Changing:** After approval, use red-green-refactor. Keep the specification, tests and
+   affected public usage documentation aligned. Add changelog entries alongside user-visible
+   changes, including migration guidance where needed.
+3. **Releasing:** Apply the checks relevant to this pytest library and follow
+   [docs/releasing.md](docs/releasing.md) for publishing. Finalize the changelog entry with
+   the version and release date, then reuse it in the release description. Keep the package
+   version, tag and changelog consistent, following the existing version source and
+   publishing workflow.
 
 ### Project conventions and agreed workflow
 
@@ -243,20 +288,13 @@ behavior tests with skips or xfails.
   For bugs, require a minimal reproduction, the command, and expected and actual results.
 - Let examples challenge existing assumptions. Prefer one coherent approach, and replace an inferior
   design when evidence justifies it, including breaking changes with clear migration guidance.
-- Write user-facing acceptance tests for human review, readable by a junior developer.
-  Cover internal implementation details and exhaustive validation combinations in agent-owned unit tests.
-- Obtain the user's explicit ok to the acceptance tests before plugin implementation.
-- After approval, use red-green-refactor and choose meaningful unit tests as needed.
+- Keep user-facing acceptance tests readable by a junior developer. Cover internal implementation
+  details and exhaustive validation combinations in agent-owned unit tests.
 - Assert public outcomes through real pytest runs; avoid coupling acceptance tests to internals.
 - Acceptance tests run isolated user projects, with common setup in fixtures.
   Use real supported configuration files, including pytest settings such as marker registration.
 - Keep unit tests independent of the filesystem where possible, testing validation directly.
   Cover file parsing and loading in acceptance tests.
-- Preserve the specification and accepted user corrections as the behavioral contract.
-- Support requirement inventories in `pyproject.toml` or `pytest.ini`, with `xspec.toml`
-  as a fallback only when neither declares an inventory.
-- Zero declared requirements means acceptance success with zero requirements.
-- Acceptance verification ignores unmarked test outcomes; ordinary pytest exit behavior remains.
 - Python style follows ruff: Python 3.10 target, 100-character lines and sorted imports.
 - Apply the same annotation and type rules to library code, tests, fixtures, scenarios and examples.
   Annotate function parameters and return values, and supply generic type arguments.
@@ -265,7 +303,6 @@ behavior tests with skips or xfails.
 - Use casts only after runtime validation or at serialization boundaries with a known schema.
   A cast does not validate the value. Keep lint exceptions in [pyproject.toml](pyproject.toml).
   Limit S101 exceptions to test code, including examples, and FBT001 exceptions to `tests/`.
-- Update public usage documentation when users need to do something differently.
 - Runtime dependencies must remain limited to pytest for v0.1.
 - Keep `__init__.py` files completely empty: no docstrings, comments or code.
   The package-root `__init__.py` may only export public user-facing functions.
@@ -290,6 +327,9 @@ underlying issue goes away (model upgrades, refactors, process changes).
   their editor.
 - Read `.codex/config.toml` before selecting skills and honor `enabled = false`;
   use enabled project workflows instead of disabled home-level workflows.
+- Keep discussion-only turns read-only until the user requests edits.
+- Create commits only when the user explicitly requests a commit. Approval to implement changes
+  does not authorize committing them.
 - Keep pull request descriptions short, covering the change and essential validation.
 - Update verified acceptance checkboxes before closing issues, and record agreed scope changes
   explicitly instead of marking superseded criteria as implemented.
@@ -304,8 +344,7 @@ underlying issue goes away (model upgrades, refactors, process changes).
   Link generated example reports after the commands that create them.
   Keep the acceptance contract and acceptance scenarios internal. Document package
   initializer and editor-navigation conventions in developer instructions.
-- Keep coding and testing rules in AGENTS.md. Keep contributor setup and workflow
-  in CONTRIBUTING.md, linked from README. Do not require contributors to read AGENTS.md.
+- Link CONTRIBUTING.md from README. Do not require contributors to read AGENTS.md.
   Link to tool and CI configuration instead of repeating their settings and checks.
 - Use commas and full stops in README prose, never semicolons or dashes.
   Use colons between example names and captions. Keep table outcomes short.

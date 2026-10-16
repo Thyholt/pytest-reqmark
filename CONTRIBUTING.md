@@ -49,6 +49,28 @@ uv run --locked prek install
 This prepares the development environment and installs checks that run before commits. Create a
 branch for your change.
 
+## AI-assisted contributions
+
+This repository uses a pinned copy of [Addy Osmani's Agent Skills](https://github.com/addyosmani/agent-skills)
+as its current engineering workflow skillset. We draw on guidance written by experienced
+practitioners to give contributors a shared approach to specifying, changing and releasing
+the library.
+
+Shared skills are included when you clone the repository, grouped by upstream author under
+`.agents/skills/<author>/`. Keep each author's skills, supporting references, license and
+source record together, preserving the upstream directory layout and relative links.
+No separate skill installation is needed. Use the bundled workflows through your agent's
+established skill-discovery mechanism. Avoid installing competing workflow collections for
+this project. Specialist skills may supplement the bundle when the task requires them.
+
+The [source record](.agents/skills/addyosmani/source.txt) identifies the exact upstream revision
+and imported paths. The [upstream license](.agents/skills/addyosmani/LICENSE) is included with
+the copy.
+Keep imported files unchanged and keep project-specific rules in repository instructions.
+Review skill additions and upgrades through pull requests: inspect the changed instructions
+and scripts, check supporting references, and try representative tasks to verify discovery
+and behavior. Update the source record and preserve the applicable licenses and attribution.
+
 ## Make a change
 
 Use the existing [acceptance tests](tests/acceptance) as a starting point for changes users can
