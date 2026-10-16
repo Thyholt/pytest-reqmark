@@ -1,0 +1,1 @@
+raise RuntimeError("DELIBERATE_COLLECTION_ERROR")

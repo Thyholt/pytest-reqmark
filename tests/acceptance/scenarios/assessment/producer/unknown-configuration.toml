@@ -1,0 +1,7 @@
+id = "build-42"
+
+[context]
+artifact = "build-42"
+
+[configurations.unknown]
+platform = "unknown"

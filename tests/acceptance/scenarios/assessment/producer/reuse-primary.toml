@@ -1,0 +1,11 @@
+id = "build-42"
+
+[context]
+artifact = "build-42"
+
+[[reuse]]
+target = "build-42"
+execution = "execution-to-reuse"
+obligation = "REQ-001-a"
+author = "Verification owner"
+reason = "Reviewed scope for this exact target and obligation."

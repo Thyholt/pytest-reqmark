@@ -1,0 +1,27 @@
+[[requirements]]
+id = "REQ-001"
+description = "A revised acceptance threshold applies."
+
+[[requirements]]
+id = "REQ-002"
+parent = "REQ-001"
+
+[[configurations]]
+id = "platform-a"
+context = {platform = "a", firmware = "v1", environment = "simulation"}
+
+[[configurations]]
+id = "platform-b"
+context = {platform = "b", firmware = "v1", environment = "simulation"}
+
+[[obligations]]
+id = "REQ-001-a"
+requirement = "REQ-001"
+suite = "primary"
+configuration = "platform-a"
+
+[[obligations]]
+id = "REQ-002-b"
+requirement = "REQ-002"
+suite = "secondary"
+configuration = "platform-b"

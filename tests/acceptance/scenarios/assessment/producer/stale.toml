@@ -1,0 +1,10 @@
+suite = "secondary"
+
+[context]
+artifact = "build-41"
+platform = "b"
+firmware = "v1"
+environment = "simulation"
+
+[provenance]
+measurements = "external/measurements.csv"

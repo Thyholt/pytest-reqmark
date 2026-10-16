@@ -1,0 +1,5 @@
+id = "physical-build-42"
+
+[context]
+artifact = "build-42"
+environment = "physical"

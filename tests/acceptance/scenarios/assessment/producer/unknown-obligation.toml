@@ -1,0 +1,11 @@
+id = "build-42"
+
+[context]
+artifact = "build-42"
+
+[[reuse]]
+target = "build-42"
+execution = "execution-to-reuse"
+obligation = "REQ-unknown"
+author = "Verification owner"
+reason = "Reviewed equivalence for this exact obligation and target."
