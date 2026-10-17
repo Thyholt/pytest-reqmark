@@ -5,7 +5,7 @@
 [![Tests][tests-badge]][tests]
 [![Code coverage][codecov-badge]][codecov]
 
-**Executable specifications with pytest.**
+**Executable specifications and verification with pytest.**
 
 Link specifications to your existing pytest tests, organize your test suite your way, and see
 which specifications your test suite verifies. Detect missing tests and enforce verification in CI.
